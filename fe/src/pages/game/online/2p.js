@@ -74,7 +74,6 @@ export function render(app, navigate) {
 	}
 
 	let leftPaddleDirection = null, rightPaddleDirection = null;
-	let keydownHandler, keyupHandler;
 
 	window.addEventListener('keydown', keydownHandler);
 	window.addEventListener('keyup', keyupHandler);

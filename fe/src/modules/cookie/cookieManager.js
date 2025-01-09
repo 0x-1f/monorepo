@@ -1,5 +1,5 @@
 // Function to set a cookie
-function setCookie(name, value, options = {}) {
+export function setCookie(name, value, options = {}) {
     let cookieStr = `${encodeURIComponent(name)}=${encodeURIComponent(value)}`;
 
     if (options.expires) {
@@ -30,7 +30,7 @@ function setCookie(name, value, options = {}) {
 }
 
 // Function to get a cookie by name
-function getCookie(name) {
+export function getCookie(name) {
     const cookies = document.cookie.split('; ');
     for (const cookie of cookies) {
         const [key, value] = cookie.split('=');
