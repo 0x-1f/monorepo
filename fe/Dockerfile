@@ -1,20 +1,15 @@
-FROM node:18 AS build
+FROM node:20-alpine
 
 WORKDIR /app
 
-COPY package.json package-lock.json ./
+COPY package*.json ./
 
 RUN npm install
 
+RUN npm install -g vite
+
 COPY . .
 
-RUN npm run build
+EXPOSE 5173
 
-FROM nginx:alpine
-
-COPY --from=build /app/dist /usr/share/nginx/html
-COPY /locale /usr/share/nginx/html/locale
-
-EXPOSE 80
-
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["npm", "run", "dev", "--", "--host"]
