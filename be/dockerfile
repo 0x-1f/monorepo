@@ -1,0 +1,19 @@
+# Use the official Python image as the base image
+FROM python:3.10-slim
+
+# Set the working directory inside the container
+WORKDIR /app
+
+# Copy the requirements file and install dependencies
+COPY /be/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the entire Django project into the container
+COPY . .
+
+# Expose the default Django port
+EXPOSE 8081
+
+# Set the default command to run the Django development server
+# CMD ["python", "manage.py", "runserver", "0.0.0.0:8081"]
+CMD ["daphne", "-p", "8081" , "be.asgi:application"]
