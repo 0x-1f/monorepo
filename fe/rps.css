@@ -1,0 +1,105 @@
+/* 공통 레이아웃 */
+.rps-container {
+    padding: 2em;
+  }
+  
+  .rps-waiting-text {
+    margin-bottom: 2em;
+    font-size: 1.5em;
+  }
+  
+  .rps-btn {
+    cursor: pointer;
+  }
+  
+  /* hover 예시 */
+  .rps-btn:hover {
+    background-color: #666;
+  }
+  
+  /* 가위바위보 시작 페이지(카운트다운) */
+  .rps-counter {
+    font-size: 2em;
+    margin-bottom: 1em;
+  }
+  
+  .rps-grid-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1em;
+    margin-bottom: 2em;
+  }
+  
+  .rps-item {
+    position: relative; /* 선택 표시용 */
+    cursor: pointer;
+  }
+  
+  .rps-item img {
+    width: 100px;
+    height: 100px;
+  }
+  
+  /* 선택 되었을 때 표시되는 흰색 바 */
+  .rps-select-highlight {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 10px;
+    background-color: white;
+    display: none; /* 선택 전까지 숨김 */
+  }
+  
+  /* 응답 대기 화면 */
+  .rps-waiting-result {
+    font-size: 1.5em;
+  }
+  
+  /* 결과화면 */
+  .rps-result-text {
+    font-size: 2em;
+    margin-bottom: 1em;
+  }
+  
+  .rps-result-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    margin-bottom: 2em;
+  }
+  
+  /* 내 쪽, 상대 쪽 */
+  .rps-side {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1em;
+  }
+  
+  .rps-my-side {
+    justify-content: flex-end;
+  }
+  
+  .rps-my-paddle {
+    width: 10px;
+    height: 100px;
+    background-color: white;
+  }
+  
+  .rps-opponent-paddle {
+    width: 10px;
+    height: 100px;
+    background-color: white;
+  }
+  
+  .rps-img {
+    width: 80px;
+    height: 80px;
+  }
+  
+  /* main 버튼 */
+  .rps-main-btn {
+    cursor: pointer;
+  }
+  
