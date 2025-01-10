@@ -19,15 +19,12 @@ class UsersViewSet(viewsets.ModelViewSet):
 	@action(detail=False, methods=["get"], url_path="login")
 	def login(self, request):
 		auth_url = (f"{settings.AUTH_URL}?client_id={settings.API_UID}&redirect_uri={settings.REDIRECT_URI}&response_type=code")
-		print(f"Redirecting to: {auth_url}")
 		return redirect(auth_url)
 
 	@action(detail=False, methods=["get", "post"], url_path="callback")
 	def callback(self, request):
-		code = request.GET.get("code")
-		if not code:
-			print("AUTHORIZATION CODE MISSING")
-			return Response({"error"}, status=400)
+		# 인가 코드로 액세스 토큰 요청하기
+		code = request.GET.get("code") # Query String 형태
 
 		token_data = {
 			"grant_type": "authorization_code",
@@ -37,29 +34,38 @@ class UsersViewSet(viewsets.ModelViewSet):
 			"redirect_uri": settings.REDIRECT_URI,
 		}
 
-		token_response = requests.post(settings.TOKEN_URL,data=token_data).json()
-		access_token = token_response.get("access_token")
-		refresh_token = token_response.get("refresh_token")
+		token_request = requests.post(settings.TOKEN_URL,data=token_data)
+		token_request_json = token_request.json()
+		error = token_request_json.get("error")
 
+		if error is not None:
+			raise JSONDecodeError(error)
+
+		access_token = token_request_json.get("access_token")
+		refresh_token = token_request_json.get("refresh_token")
+
+		# 발급 된 인가 코드로 액세스 토큰으로 데이터를 요청
 		headers = {"Authorization": f"Bearer {access_token}"}
 
-		user_response = requests.get(f"{settings.API_BASE_URL}me", headers=headers).json()
+		user_response = requests.get(f"{settings.API_BASE_URL}me", headers=headers)
+		user_response_json = requests.get(f"{settings.API_BASE_URL}me", headers=headers).json()
+		response_status = user_response.status_code
 
-		intra_id = user_response.get("login")
-		if not intra_id:
-			return Response("User maybe empty")
+		if response_status != 200:
+			return JsonResponse({"status": 400, "message": "Bad Request"}, status=status.HTTP_400_BAD_REQUEST)
+
 		user_profile, created = Users.objects.update_or_create(
-			intra_id = user_response.get("login"),
+			intra_id = user_response_json.get("login"),
 			defaults = {
 				"refresh_token": refresh_token,
+				"access_token": access_token,
 			},
 		)
-# 인증성공하면 redirect to "baseURL/main"
-		# return redirect("baseURL/main")
-		return Response(
-			{
-				"message": "user profile saved successfully.",
-				"user": user_profile.intra_id,
-			}
-		)
+		request.session['access_token'] = access_token
+		request.session['refresh_token'] = refresh_token
+
+		response_http = HttpResponseRedirect("http://localhost/main")
+		response_http.set_cookie("intra_id", user_profile.intra_id)
+		response_http.set_cookie("access_token", access_token)
+		return response_http
 
