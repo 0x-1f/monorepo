@@ -23,6 +23,6 @@ export function render(app, navigate) {
 		const data = JSON.parse(e);
 		const match_url = data.match_url;
         setCookie('match_url', match_url);
-		navigate('/game/online/2p/game');
+		navigate('game/online/2p/game');
 	}
 }
