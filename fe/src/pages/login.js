@@ -4,6 +4,7 @@ export function render(app, navigate) {
         <button class="button btn-primary" id="loginButton">Login with 42</button>
     `;
     document.getElementById('loginButton').addEventListener('click', () => {
-        navigate('main');
+        // http://localhost:8081로 연결
+        window.location.href = 'http://localhost:8081/users/login';
     });
 }
