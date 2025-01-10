@@ -19,14 +19,14 @@ export function render(app, navigate) {
 		navigate('/404');
 	}
 
-	const wss = new WebSocket(`wss://localhost:8082${wsurl}`);
+	const wss = new WebSocket(`wss://localhost:8081${wsurl}`);
 
 	wss.onopen = function(e) {
 		console.log('WS Opened');
 	}
 
 	wss.onmessage = function(e) {
-		gameState = JSON.parse(e.data);
+		const gameState = JSON.parse(e.data);
 		drawGameState(gameState);
 	}
 
@@ -73,22 +73,34 @@ export function render(app, navigate) {
 		movePaddle();
 	}
 
-	let leftPaddleDirection = null, rightPaddleDirection = null;
+	// let leftPaddleDirection = null, rightPaddleDirection = null;
 
-	window.addEventListener('keydown', keydownHandler);
-	window.addEventListener('keyup', keyupHandler);
+	// window.addEventListener('keydown', keydownHandler);
+	// window.addEventListener('keyup', keyupHandler);
 
-	function keydownHandler(e) {
-		if (e.key === 'w') leftPaddleDirection = 'up';
-		if (e.key === 's') leftPaddleDirection = 'down';
-		if (e.key === 'ArrowUp') rightPaddleDirection = 'up';
-		if (e.key === 'ArrowDown') rightPaddleDirection = 'down';
-	}
+	// function keydownHandler(e) {
+	// 	if (e.key === 'w') leftPaddleDirection = 'up';
+	// 	if (e.key === 's') leftPaddleDirection = 'down';
+	// 	if (e.key === 'ArrowUp') rightPaddleDirection = 'up';
+	// 	if (e.key === 'ArrowDown') rightPaddleDirection = 'down';
+	// }
 
-	function keyupHandler(e) {
-		if (e.key === 'w' || e.key === 's') leftPaddleDirection = null;
-		if (e.key === 'ArrowUp' || e.key === 'ArrowDown') rightPaddleDirection = null;
-	}
+	// function keyupHandler(e) {
+	// 	if (e.key === 'w' || e.key === 's') leftPaddleDirection = null;
+	// 	if (e.key === 'ArrowUp' || e.key === 'ArrowDown') rightPaddleDirection = null;
+	// }
 
-	
+    //임시 키보드 이벤트 감지 코드
+    document.addEventListener("keydown", function (e) {
+        if (!wss) return;
+  
+        // w -> 위로 이동, s -> 아래로 이동
+        if (e.key === "w") {
+          // {"move":["up"]} 전송
+          wss.send(JSON.stringify({ "move" : "up" }));
+        } else if (e.key === "s") {
+          // {"move":["down"]} 전송
+          wss.send(JSON.stringify({ "move" : "down" }));
+        }
+      });
 }

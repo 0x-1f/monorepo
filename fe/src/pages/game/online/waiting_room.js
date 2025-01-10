@@ -12,7 +12,7 @@ export function render(app, navigate) {
     // document.getElementById('you').addEventListener('click', () => navigate('game/online/2p'));
     // document.getElementById('rival').addEventListener('click', () => navigate('game/online/4p'));
 
-    const wss = new WebSocket('wss://localhost:8082/ws/pong');
+    const wss = new WebSocket('wss://localhost:8081/ws/pong');
 
     wss.onopen = function(e) {
 		console.log('Waiting for participations...');
