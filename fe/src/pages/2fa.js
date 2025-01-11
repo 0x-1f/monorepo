@@ -1,3 +1,4 @@
+import { getCookie } from '/src/modules/cookie/cookieManager.js';
 import { t } from '/src/modules/locale/localeManager.js';
 
 export function render(app, navigate) {
@@ -9,24 +10,29 @@ export function render(app, navigate) {
 	</form>
 	`;
 
-	document.getElementById('2fa-form').addEventListener('submit', (e) => {
+	document.getElementById('2fa-form').addEventListener('submit', async (e) => {
 		e.preventDefault();
 		const code = document.getElementById('2fa-input').value;
 		if (code.length !== 6) {
 			alert(t('2fa-invalid', 'Invalid 2FA code'));
 			return;
 		}
-		if (fetch('/api/auth/verify', {
+		fetch('/api/auth/verify/', {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
 			},
-			body: JSON.stringify({ code }),
-		}).status !== 200) {
-			alert(t('2fa-invalid', 'Invalid 2FA code'));
-			return;
-		}
-		navigate('main');
+			body: JSON.stringify({
+					'code': code,
+					'jwt': getCookie('jwt'),
+				}),
+		}).then(response => {
+			if (response.ok) {
+				navigate('main');
+			} else {
+				alert(t('2fa-invalid', 'Invalid 2FA code'));
+			}
+		});
 	});
 
 }

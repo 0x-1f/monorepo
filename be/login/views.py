@@ -78,22 +78,28 @@ class IntraAuthViewSet(viewsets.ModelViewSet):
             return JsonResponse({"error": f"[Failed to create JWT token]: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         send_and_save_verification_code(user_profile)
         print(f"jwt_token: {jwt_token}", flush=True)
-        # redircet with cookie
-        return redirect(REDIRECT_URI)
+        response = redirect(REDIRECT_URI)
+        response.set_cookie('jwt', jwt_token)
+        return response
 
     @action(detail=False, methods=["post"], url_path="verify")
     def verify_code(self, request):
         code = request.data.get('code')
         if not code:
             return JsonResponse({'error': f"[Verification code is required]"}, status=status.HTTP_400_BAD_REQUEST)
-
+        jwt_token = request.data.get('jwt')
+        payload = jwt.decode(jwt_token, settings.JWT_SECRET_KEY, algorithms=['HS256'])
+        user_email = payload.get('user_email')
+        print(f"user_email: {user_email}", flush=True)
         try:
-            user_email = request.data.get('email')
             user = Users.objects.get(email=user_email)
-
+            print(f"user: {user}", flush=True)
+            print(f"verification code: {user.verification_code}, code: {code}", flush=True)
             if user.verification_code == code:
                 jwt_token = create_jwt_token(user, settings.JWT_SECRET_KEY, 3)
-                return JsonResponse({'token': jwt_token}, status=status.HTTP_200_OK)
+                response = JsonResponse({'message': 'Verification success'},status=status.HTTP_200_OK)
+                response.set_cookie('jwt', jwt_token)
+                return response
             else:
                 return JsonResponse({'error': 'Verification code is invalid'}, status=status.HTTP_400_BAD_REQUEST)
         except Users.DoesNotExist:
@@ -105,11 +111,12 @@ def send_and_save_verification_code(user):
     print("try sending", flush=True)
     verification_code = get_random_string(length=6)
     user.verification_code = verification_code
-    print(f"verification code: {verification_code}", flush=True)
+    user.save()
+    print(f"verification code: {verification_code} in user {user}: {user.verification_code}", flush=True)
 
     print(f"email: {settings.EMAIL_HOST_USER} || pw: {settings.EMAIL_HOST_PASSWORD}", flush=True)
 
-    print(f"user email: {user.email}", flush=True)
+    print(f"user email: {user.email}\n", flush=True)
 
     mail_subject = "0x-1f 이메일 인증 코드입니다."
     message = f'당신의 인증 코드는 {verification_code} 입니다.'
