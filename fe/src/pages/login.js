@@ -1,3 +1,5 @@
+import { getCookie } from '/src/modules/cookie/cookieManager.js';
+
 export function render(app, navigate) {
     app.innerHTML = `
         <h1>PONG</h1>
@@ -6,4 +8,8 @@ export function render(app, navigate) {
     document.getElementById('loginButton').addEventListener('click', () => {
         window.location.href = 'http://localhost/api/auth/login';
     });
+
+    if (getCookie('jwt')) {
+        navigate('main');
+    }
 }

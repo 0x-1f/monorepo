@@ -1,4 +1,5 @@
 import { changeLocale } from "../../modules/locale/localeManager";
+import { getCookie } from "../../modules/cookie/cookieManager";
 
 export function renderHeader(header) {
     header.innerHTML = `
@@ -12,6 +13,11 @@ export function renderHeader(header) {
             </div> <!-- .dropdown-content -->
         </header>
     `;
+
+    const jwt = getCookie('jwt');
+    if (!jwt && window.location.pathname !== '/login') {
+        window.location.href = '/login';
+    }
 
     document.getElementById('dropbtn').addEventListener('click', () => {
         const dropdown = document.getElementById('dropdowncontent');
