@@ -3,7 +3,7 @@ import { getCookie } from '/src/modules/cookie/cookieManager.js';
 
 export function render(app, navigate) {
 	app.innerHTML = `
-		<canvas id="pongCanvas" width="800px" height="400px" style="border: 1px solid #FFF">
+		<canvas id="pongCanvas" width="800px" height="600px" style="border: 1px solid #FFF">
 		Your browser does not support this game.
 		</canvas>
 		<div class="score-box" style="display: flex; align-items: center; justify-content: center;">

@@ -15,7 +15,7 @@ export function render(app, navigate) {
     //
     const intraID = prompt('Enter your intra ID');
     //
-    const wss = new WebSocket(`wss://localhost/ws/pong/${intraID}`);
+    const wss = new WebSocket(`wss://localhost/ws/pong/join/${intraID}`);
 
     wss.onopen = function(e) {
 		console.log('Waiting for participations...');
@@ -23,7 +23,7 @@ export function render(app, navigate) {
 
 	wss.onmessage = function(e) {
 		console.log(e);
-		const data = JSON.parse(e);
+		const data = JSON.parse(e.data);
 		const match_url = data.match_url;
         setCookie('match_url', match_url);
         //
