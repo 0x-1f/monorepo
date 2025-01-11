@@ -18,8 +18,10 @@ export function render(app, navigate) {
 		console.log('No match url found');
 		navigate('/404');
 	}
-
-	const wss = new WebSocket(`wss://localhost:8081${wsurl}`);
+    //
+    const intraID = getCookie('intraID');
+	//
+    const wss = new WebSocket(`wss://localhost${wsurl}${intraID}`);
 
 	wss.onopen = function(e) {
 		console.log('WS Opened');
