@@ -5,6 +5,6 @@ export function render(app, navigate) {
     `;
     document.getElementById('loginButton').addEventListener('click', () => {
         // http://localhost:8081로 연결
-        window.location.href = 'http://localhost:8081/users/login';
+        window.location.href = 'http://localhost/api/auth/login';
     });
 }
