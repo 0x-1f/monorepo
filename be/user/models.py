@@ -11,9 +11,9 @@ class Users(models.Model):
 	pong_win = models.PositiveIntegerField(default=0)
 	pong_lose = models.PositiveIntegerField(default=0)
 	tournament_win = models.PositiveIntegerField(default=0)
-	rsp_win = models.PositiveIntegerField(default=0)
-	rsp_lose = models.PositiveIntegerField(default=0)
-	rsp_draw = models.PositiveIntegerField(default=0)
+	rps_win = models.PositiveIntegerField(default=0)
+	rps_lose = models.PositiveIntegerField(default=0)
+	rps_draw = models.PositiveIntegerField(default=0)
 
 	def __str__(self):
 		return f"User {self.intra_id}({self.user_id})"
