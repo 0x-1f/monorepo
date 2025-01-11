@@ -22,5 +22,9 @@
     "rps-result-win": "당신이 이겼습니다!",
     "rps-result-lose": "당신이 졌습니다!",
     "rps-result-draw": "비겼습니다!",
-    "ros-result-unknown": "알 수 없는 결과"
+    "ros-result-unknown": "알 수 없는 결과",
+
+	"2fa": "2단계 인증",
+	"2fa-placeholder": "6자리 코드를 입력하세요",
+	"2fa-submit": "제출"
 }
