@@ -306,7 +306,7 @@ function cleanupAllWebSockets() {
     }
     if (wss) {
         cleanupWss(wss);
-        ws = null;
+        wss = null;
     }
     if (matchWss) {
         cleanupWss(matchWss);

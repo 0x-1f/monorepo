@@ -49,6 +49,7 @@
   height: 120px;
   display: block;
   margin: 0 auto; /* 가로 중앙 정렬 */
+  margin-bottom: 40px; /* 이미지 아래 여백 추가, 필요에 따라 값 조절 */
 }
 
 /* 선택 되었을 때 표시되는 흰색 바 */
