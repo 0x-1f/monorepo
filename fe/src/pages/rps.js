@@ -4,8 +4,8 @@ import paper from '/assets/paper.png';
 import scissors from '/assets/scissors.png';
 
 let intraId = null;
-let ws = null;
-let matchWs = null;
+let wss = null;
+let matchWss = null;
 let choice = "";
 let countdownInterval = null;
 
@@ -31,13 +31,13 @@ function renderStartPage(app, navigate) {
     startBtn.classList.add("btn", "btn-primary", "rps-btn");
 
     startBtn.addEventListener("click", () => {
-    // intra_id 를 입력 받는다.
-    intraId = prompt("Enter your intra_id");
-    if (!intraId) {
-        alert("intra_id is required!");
-        return;
-    }
-    startMatching(app, navigate);
+        // intra_id 를 입력 받는다.
+        intraId = prompt("Enter your intra_id");
+        if (!intraId) {
+            alert("intra_id is required!");
+            return;
+        }
+        startMatching(app, navigate);
     });
 
     container.appendChild(startBtn);
@@ -58,8 +58,8 @@ function renderMatchingPage(app) {
     cancelBtn.classList.add("btn", "btn-danger", "rps-btn");
 
     cancelBtn.addEventListener("click", () => {
-    cleanupAllWebSockets();
-    renderStartPage(app);
+        cleanupAllWebSockets();
+        renderStartPage(app);
     });
 
     app.appendChild(waitingText);
@@ -139,24 +139,24 @@ function renderRpsGamePage(app) {
 
     // 6) 10초 카운트다운
     let count = 10;
-      countdownInterval = setInterval(() => {
+    countdownInterval = setInterval(() => {
         count--;
         counterDiv.textContent = String(count);
 
         if (count <= 0) {
-          clearInterval(countdownInterval);
-          countdownInterval = null;
+            clearInterval(countdownInterval);
+            countdownInterval = null;
 
-          // 아직 아무것도 클릭 안했다면 랜덤 지정
-          if (!choice) {
+            // 아직 아무것도 클릭 안했다면 랜덤 지정
+            if (!choice) {
             choice = getRandomChoice();
-          }
+            }
 
-          // 서버 전송 후 "응답 대기" 페이지로 이동
-          sendChoiceToServer(choice);
-          renderWaitingResultPage(app);
+            // 서버 전송 후 "응답 대기" 페이지로 이동
+            sendChoiceToServer(choice);
+            renderWaitingResultPage(app);
         }
-      }, 1000);
+    }, 1000);
 }
 
 /** 4) 응답 대기 화면 */
@@ -177,17 +177,17 @@ function renderResultPage(app, navigate, result, opponentChoice, opponentId) {
     const resultText = document.createElement("div");
     resultText.className = "rps-result-text";
     switch (result) {
-    case "win":
-    resultText.textContent = t('rps-win', "YOU WIN!");
-    break;
-    case "lose":
-    resultText.textContent = t('rps-lose', "YOU LOSE...");
-    break;
-    case "draw":
-    resultText.textContent = t('rps-draw', "DRAW");
-    break;
-    default:
-    resultText.textContent = t('rps-unknown', "UNKNOWN");
+        case "win":
+        resultText.textContent = t('rps-win', "YOU WIN!");
+        break;
+        case "lose":
+        resultText.textContent = t('rps-lose', "YOU LOSE...");
+        break;
+        case "draw":
+        resultText.textContent = t('rps-draw', "DRAW");
+        break;
+        default:
+        resultText.textContent = t('rps-unknown', "UNKNOWN");
     }
     app.appendChild(resultText);
 
@@ -242,8 +242,8 @@ function renderResultPage(app, navigate, result, opponentChoice, opponentId) {
     mainBtn.classList.add("btn", "btn-warning", "rps-main-btn");
 
     mainBtn.addEventListener("click", () => {
-    cleanupAllWebSockets();
-    navigate("main");
+        cleanupAllWebSockets();
+        navigate("main");
     });
 
     const btnContainer = document.createElement("div");
@@ -257,60 +257,65 @@ function renderResultPage(app, navigate, result, opponentChoice, opponentId) {
 
 function startMatching(app, navigate) {
     renderMatchingPage(app);
-    ws = new WebSocket(`ws://localhost:8081/ws/rps/join/${intraId}`);
-    ws.onopen = () => console.log("[Matching WS] Connected");
-    ws.onmessage = (event) => {
-    const data = JSON.parse(event.data);
-    if (data.match_url) {
-        cleanupWs(ws);
-        connectMatchWebSocket(app, navigate, data.match_url);
-    }
+    wss = new WebSocket(`wss://localhost/ws/rps/join/${intraId}`);
+    wss.onopen = () => console.log("[Matching WSS] Connected");
+    wss.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (data.match_url) {
+            cleanupWss(wss);
+            connectMatchWebSocket(app, navigate, data.match_url);
+        }
     };
-    ws.onerror = (err) => console.error("[Matching WS] Error:", err);
-    ws.onclose = () => console.log("[Matching WS] Closed");
+    wss.onerror = (err) => console.error("[Matching WSS] Error:", err);
+    wss.onclose = () => console.log("[Matching WSS] Closed");
 }
 
 function connectMatchWebSocket(app, navigate, matchUrl) {
     renderWaitingGamePage(app);
     const splitted = matchUrl.split("/");
-    const matchName = splitted[splitted.length - 1];
-    matchWs = new WebSocket(`ws://localhost:8081/ws/rps/match/${matchName}/${intraId}`);
-    matchWs.onmessage = (event) => {
-    const data = JSON.parse(event.data);
-    if (data.status === "start") {
-        renderRpsGamePage(app);
-    }
-    if (data.result) {
-        const opponentId = getOpponentIdFromMatchName(matchName);
-        renderResultPage(app, navigate, data.result, data.opponent_choice, opponentId);
-    }
+    const matchName = splitted[splitted.length - 2];
+    
+    matchWss = new WebSocket(`wss://localhost${matchUrl}${intraId}`);
+    matchWss.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (data.status === "start") {
+            renderRpsGamePage(app);
+        }
+        else if (data.status === "network_error") {
+            cleanupAllWebSockets();
+            navigate("error");
+        }
+        else if (data.status === "finished") {
+            const opponentId = getOpponentIdFromMatchName(matchName);
+            renderResultPage(app, navigate, data.result, data.opponent_choice, opponentId);
+        }
     };
 }
 
 function sendChoiceToServer(myChoice) {
-    if (matchWs && matchWs.readyState === WebSocket.OPEN) {
-    const payload = { choice: myChoice };
-    matchWs.send(JSON.stringify(payload));
+    if (matchWss && matchWss.readyState === WebSocket.OPEN) {
+        const payload = { choice: myChoice };
+        matchWss.send(JSON.stringify(payload));
     }
 }
 
 function cleanupAllWebSockets() {
     if (countdownInterval) {
-    clearInterval(countdownInterval);
-    countdownInterval = null;
+        clearInterval(countdownInterval);
+        countdownInterval = null;
     }
-    if (ws) {
-    cleanupWs(ws);
-    ws = null;
+    if (wss) {
+        cleanupWss(wss);
+        ws = null;
     }
-    if (matchWs) {
-    cleanupWs(matchWs);
-    matchWs = null;
+    if (matchWss) {
+        cleanupWss(matchWss);
+        matchWss = null;
     }
     choice = "";
 }
 
-function cleanupWs(socket) {
+function cleanupWss(socket) {
     socket.onopen = null;
     socket.onmessage = null;
     socket.onerror = null;
@@ -330,10 +335,10 @@ function getOpponentIdFromMatchName(matchName) {
 
 function getImagePath(item) {
     switch (item) {
-    case "rock": return rock;
-    case "paper": return paper;
-    case "scissors": return scissors;
-    default: return "";
+        case "rock": return rock;
+        case "paper": return paper;
+        case "scissors": return scissors;
+        default: return "";
     }
 }
 
