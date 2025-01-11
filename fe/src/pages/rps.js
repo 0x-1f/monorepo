@@ -11,13 +11,13 @@ let countdownInterval = null;
 
 export function render(app, navigate) {
     // 초기 렌더링
-    renderStartPage(app);
+    renderStartPage(app, navigate);
     cleanupAllWebSockets();
     // renderRpsGamePage(app);
 }
 
 /** 1) 최초 화면: "start matching" 버튼만 있는 화면 */
-function renderStartPage(app) {
+function renderStartPage(app, navigate) {
     app.innerHTML = "";
 
     // .rps-container 클래스를 가진 div
@@ -37,7 +37,7 @@ function renderStartPage(app) {
         alert("intra_id is required!");
         return;
     }
-    startMatching(app);
+    startMatching(app, navigate);
     });
 
     container.appendChild(startBtn);
@@ -170,7 +170,7 @@ function renderWaitingResultPage(app) {
 }
 
 /** 5) 최종 결과 화면 */
-function renderResultPage(app, result, opponentChoice, opponentId) {
+function renderResultPage(app, navigate, result, opponentChoice, opponentId) {
     app.innerHTML = "";
 
     // 결과 문구
@@ -255,7 +255,7 @@ function renderResultPage(app, result, opponentChoice, opponentId) {
 
 /** --- 이하 웹소켓 로직 및 유틸 함수는 기존과 동일 --- **/
 
-function startMatching(app) {
+function startMatching(app, navigate) {
     renderMatchingPage(app);
     ws = new WebSocket(`ws://localhost:8081/ws/rps/join/${intraId}`);
     ws.onopen = () => console.log("[Matching WS] Connected");
@@ -263,14 +263,14 @@ function startMatching(app) {
     const data = JSON.parse(event.data);
     if (data.match_url) {
         cleanupWs(ws);
-        connectMatchWebSocket(app, data.match_url);
+        connectMatchWebSocket(app, navigate, data.match_url);
     }
     };
     ws.onerror = (err) => console.error("[Matching WS] Error:", err);
     ws.onclose = () => console.log("[Matching WS] Closed");
 }
 
-function connectMatchWebSocket(app, matchUrl) {
+function connectMatchWebSocket(app, navigate, matchUrl) {
     renderWaitingGamePage(app);
     const splitted = matchUrl.split("/");
     const matchName = splitted[splitted.length - 1];
@@ -282,7 +282,7 @@ function connectMatchWebSocket(app, matchUrl) {
     }
     if (data.result) {
         const opponentId = getOpponentIdFromMatchName(matchName);
-        renderResultPage(app, data.result, data.opponent_choice, opponentId);
+        renderResultPage(app, navigate, data.result, data.opponent_choice, opponentId);
     }
     };
 }
