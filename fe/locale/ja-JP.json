@@ -26,5 +26,6 @@
 
 	"2fa": "2段階認証",
 	"2fa-placeholder": "6桁のコードを入力してください",
-	"2fa-submit": "送信"
+	"2fa-submit": "送信",
+	"2fa-invalid": "無効なコードです。"
 }

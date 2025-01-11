@@ -26,5 +26,6 @@
 
 	"2fa": "2단계 인증",
 	"2fa-placeholder": "6자리 코드를 입력하세요",
-	"2fa-submit": "제출"
+	"2fa-submit": "제출",
+	"2fa-invalid": "유효하지 않은 코드입니다."
 }
