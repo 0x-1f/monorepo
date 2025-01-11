@@ -19,7 +19,7 @@ export function renderHeader(header) {
     });
 
     const currentUrl = window.location.href;
-    if (currentUrl.includes('/game')) {
+    if (currentUrl.includes('/game') || currentUrl.includes('/rps')) {
         document.getElementById('dropbtn').style.display = 'none';
     }
 
