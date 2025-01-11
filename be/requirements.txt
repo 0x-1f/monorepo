@@ -6,3 +6,4 @@ django-allauth
 requests
 channels
 daphne
+PyJWT

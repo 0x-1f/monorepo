@@ -164,7 +164,9 @@ ASGI_APPLICATION = 'be.asgi.application'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = config('SMTP_HOST', default="")
 EMAIL_PORT = config('SMTP_PORT', default="")
-EMAIL_USER = config('SMTP_ID', default="")
-EMAIL_PW = config('SMTP_PW', default="")
+EMAIL_HOST_USER = config('SMTP_ID', default="")
+EMAIL_HOST_PASSWORD = config('SMTP_PW', default="")
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 JWT_SECRET_KEY = config('JWT_SECRET_KEY', default="")

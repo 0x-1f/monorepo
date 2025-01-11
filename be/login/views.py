@@ -1,4 +1,7 @@
 import requests
+import jwt
+
+from datetime import datetime, timedelta
 
 from django.conf import settings
 from django.core.mail import send_mail
@@ -12,7 +15,8 @@ from rest_framework.decorators import action
 
 from user.models import Users
 
-CALLBACK_URI = settings.REDIRECT_URI
+CALLBACK_URI = "http://localhost/api/auth/callback"
+REDIRECT_URI = settings.REDIRECT_URI
 AUTH_URL = settings.AUTH_URL
 TOKEN_URL = settings.TOKEN_URL
 API_BASE_URL = settings.API_BASE_URL
@@ -73,8 +77,9 @@ class IntraAuthViewSet(viewsets.ModelViewSet):
         except Exception as e:
             return JsonResponse({"error": f"[Failed to create JWT token]: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         send_and_save_verification_code(user_profile)
+        print(f"jwt_token: {jwt_token}", flush=True)
         # redircet with cookie
-        return JsonResponse({'message': 'Verification code sent to email in intra'}, status=status.HTTP_200_OK)
+        return redirect(REDIRECT_URI)
 
     @action(detail=False, methods=["post"], url_path="verify")
     def verify_code(self, request):
@@ -97,35 +102,27 @@ class IntraAuthViewSet(viewsets.ModelViewSet):
             return JsonResponse({'error': f"[{e.__class__.__name__}] {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 def send_and_save_verification_code(user):
+    print("try sending", flush=True)
     verification_code = get_random_string(length=6)
     user.verification_code = verification_code
+    print(f"verification code: {verification_code}", flush=True)
+
+    print(f"email: {settings.EMAIL_HOST_USER} || pw: {settings.EMAIL_HOST_PASSWORD}", flush=True)
+
+    print(f"user email: {user.email}", flush=True)
 
     mail_subject = "0x-1f 이메일 인증 코드입니다."
     message = f'당신의 인증 코드는 {verification_code} 입니다.'
-    send_mail(mail_subject, message, settings.SMTP_ID, [user.email])
+    send_mail(mail_subject, message, settings.EMAIL_HOST_USER, [user.email])
 
 def create_jwt_token(user: Users, secret_key, expire_days:int):
     try:
         payload = {
             'user_email': user.email,
-            'exp': datetime.utcnow() + timedelta(days=expiration_days),
+            'exp': datetime.utcnow() + timedelta(days=expire_days),
         }
         token = jwt.encode(payload, secret_key, algorithm='HS256')
         token = token.decode('utf-8') if isinstance(token, bytes) else token
         return token
     except Exception as e:
         raise Exception(f"[{e.__class__.__name__}] {str(e)}")
-
-# class CodeVerificationView(viewsets.ModelViewSet):
-#     def create(self, request):
-#         try:
-#             user = validate_jwt_token_and_get_user(request, settings.JWT_SECRET_KEY)
-#             verification_code = get_request_body_value(request, 'code')
-#             intra_id = user.intra_id
-#             is_new = True if intra_id is None else False
-
-#             if user.verification_code == verification_code:
-#                 jwt_token = create_jwt_token(user, JWT_AUTH_sECRET_KEY, 7)
-                
-#         except Exception as e:
-#             return JsonResponse({"error": f"[{e.__class__.__name__}] {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
