@@ -1,3 +1,7 @@
+import rock from '/assets/rock.png';
+import paper from '/assets/paper.png';
+import scissor from '/assets/scissor.png';
+
 let intraId = null;
 let ws = null;
 let matchWs = null;
@@ -5,9 +9,10 @@ let choice = "";
 let countdownInterval = null;
 
 export function render(app, navigate) {
-  // 초기 렌더링
-  renderStartPage(app);
-  cleanupAllWebSockets();
+    // 초기 렌더링
+    renderStartPage(app);
+    cleanupAllWebSockets();
+    // renderRpsGamePage(app);
 }
 
 /** 1) 최초 화면: "start matching" 버튼만 있는 화면 */
@@ -43,7 +48,7 @@ function renderMatchingPage(app) {
   app.innerHTML = "";
 
   const waitingText = document.createElement("div");
-  waitingText.textContent = "waiting for opponent...";
+  waitingText.textContent = "Waiting for opponent...";
   waitingText.className = "rps-waiting-text";
 
   const cancelBtn = document.createElement("button");
@@ -65,68 +70,87 @@ function renderWaitingGamePage(app) {
   app.innerHTML = "";
 
   const waitingText = document.createElement("div");
-  waitingText.textContent = "대기중...";
+  waitingText.textContent = "Game will start soon...";
   waitingText.style.fontSize = "2em"; // 간단한건 그냥 남겨도 되지만, css class로 빼도 됨
 
   app.appendChild(waitingText);
 }
-
 /** 3) 게임 시작 화면 (가위바위보 선택) */
 function renderRpsGamePage(app) {
+  // 기존 화면 비우기
   app.innerHTML = "";
 
+  // 1) 카운트다운 영역
   const counterDiv = document.createElement("div");
-  counterDiv.className = "rps-counter";
-  counterDiv.textContent = "10"; // 초기값 10
+  counterDiv.className = "rps-counter"; 
+  counterDiv.textContent = "10";  // 초기 카운트 10
 
-  // 가위바위보 컨테이너
+  // 2) 3열 그리드 (가위바위보 선택 영역)
   const gridContainer = document.createElement("div");
   gridContainer.className = "rps-grid-container";
 
-  // rock, paper, scissor
+  // 3) 가위바위보 항목
   const items = ["rock", "paper", "scissor"];
+  let selectedHighlightDiv = null; // 현재 선택 표시(div) 추적
 
   items.forEach(item => {
-    const itemDiv = document.createElement("div");
-    itemDiv.className = "rps-item";
+    // 3-1. 각 셀(각 그림용)
+    const cellDiv = document.createElement("div");
+    cellDiv.className = "rps-item";  
+    // .rps-item:hover { background-color: #333; } → CSS에서 호버링 처리
 
+    // 3-2. 이미지
     const img = document.createElement("img");
+    img.className = "rps-img";  // 크기 120x120
     img.src = getImagePath(item);
-    // 여기서는 width, height도 CSS로 뺄 수 있음. 지금은 inline 예시로 남김.
-    img.className = "rps-img";
 
-    // 선택 표시
-    const selectHighlight = document.createElement("div");
-    selectHighlight.className = "rps-select-highlight";
+    // 3-3. 선택 표시(하얀색 패)
+    const highlightBar = document.createElement("div");
+    highlightBar.className = "rps-select-highlight"; 
+    // 기본 display: none (CSS에서)
 
-    itemDiv.addEventListener("click", () => {
-      // 이미 선택된 다른 그리드의 .rps-select-highlight를 모두 숨김
-      gridContainer.querySelectorAll(".rps-select-highlight").forEach(div => {
-        div.style.display = "none";
-      });
-      selectHighlight.style.display = "block";
-      choice = item;
+    // 3-4. 클릭 이벤트: 기존 선택 해제 → 새 선택 표시
+    cellDiv.addEventListener("click", () => {
+      if (selectedHighlightDiv) {
+        selectedHighlightDiv.style.display = "none"; // 기존 선택 숨김
+      }
+      highlightBar.style.display = "block"; // 새 선택 표시
+      selectedHighlightDiv = highlightBar;
+      choice = item; // 전역 변수 choice 갱신
     });
 
-    itemDiv.appendChild(img);
-    itemDiv.appendChild(selectHighlight);
-    gridContainer.appendChild(itemDiv);
+    // 3-5. 구조 조립
+    cellDiv.appendChild(img);
+    cellDiv.appendChild(highlightBar);
+    gridContainer.appendChild(cellDiv);
   });
 
+  // 4) 10초 미선택 시 랜덤처리 안내 문구
+  const warningText = document.createElement("div");
+  warningText.className = "rps-warning-text"; 
+  warningText.textContent = "If you do not select in 10 seconds, a random selection will be made.";
+
+  // 5) 화면에 요소들 추가
   app.appendChild(counterDiv);
   app.appendChild(gridContainer);
+  app.appendChild(warningText);
 
-  // 10초 카운트다운
+  // 6) 10초 카운트다운
   let count = 10;
   countdownInterval = setInterval(() => {
     count--;
     counterDiv.textContent = String(count);
+
     if (count <= 0) {
       clearInterval(countdownInterval);
       countdownInterval = null;
+
+      // 아직 아무것도 클릭 안했다면 랜덤 지정
       if (!choice) {
         choice = getRandomChoice();
       }
+
+      // 서버 전송 후 "응답 대기" 페이지로 이동
       sendChoiceToServer(choice);
       renderWaitingResultPage(app);
     }
@@ -138,7 +162,7 @@ function renderWaitingResultPage(app) {
   app.innerHTML = "";
 
   const text = document.createElement("div");
-  text.textContent = "응답을 기다리는 중...";
+  text.textContent = "Waiting for result...";
   text.className = "rps-waiting-result";
   app.appendChild(text);
 }
@@ -234,14 +258,16 @@ function startMatching(app) {
 
 function connectMatchWebSocket(app, matchUrl) {
   renderWaitingGamePage(app);
-  matchWs = new WebSocket(`ws://localhost:8081/ws/rps${matchUrl}${intraId}`);
+  const splitted = matchUrl.split("/");
+  const matchName = splitted[splitted.length - 1];
+  matchWs = new WebSocket(`ws://localhost:8081/ws/rps/match/${matchName}/${intraId}`);
   matchWs.onmessage = (event) => {
     const data = JSON.parse(event.data);
     if (data.status === "start") {
       renderRpsGamePage(app);
     }
     if (data.result) {
-      const opponentId = getOpponentIdFromUrl(matchUrl);
+      const opponentId = getOpponentIdFromMatchName(matchName);
       renderResultPage(app, data.result, data.opponent_choice, opponentId);
     }
   };
@@ -278,20 +304,21 @@ function cleanupWs(socket) {
   socket.close();
 }
 
-function getOpponentIdFromUrl(url) {
-  // url 예: "/ws/rps/sungmiki_junmoon/"
-  const tokens = url.split("/").filter(Boolean);
-  const lastPart = tokens[tokens.length - 1]; 
-  const ids = lastPart.split("_");
-  const opponent = ids.find(id => id !== intraId);
+function getOpponentIdFromMatchName(matchName) {
+  // matchName 예: "sungmiki_junmoon"
+  const splitted = matchName.split("_");  // ["sungmiki", "junmoon"]
+
+  // 전역변수 intraId(내 아이디)와 다른 쪽이 상대방 아이디
+  // Array.splitted(() =>{}) 는 Array의 요소 중 함수의 조건을 만족하는 첫번째 요소를 반환
+  const opponent = splitted.find((id) => id !== intraId);
   return opponent || "UnknownOpponent";
 }
 
 function getImagePath(item) {
   switch (item) {
-    case "rock": return "../img/rock.png";
-    case "paper": return "../img/paper.png";
-    case "scissor": return "../img/scissor.png";
+    case "rock": return rock;
+    case "paper": return paper;
+    case "scissor": return scissor;
     default: return "";
   }
 }
