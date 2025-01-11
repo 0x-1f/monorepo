@@ -1,6 +1,6 @@
 import requests
 from django.shortcuts import redirect
-from django.http import JsonResponse
+from django.http import JsonResponse, Http404
 from django.conf import settings
 
 from rest_framework import viewsets
@@ -9,6 +9,8 @@ from rest_framework.decorators import action, api_view
 
 from .models import Item, Users, PongGame
 from .serializers import ItemSerializer, PongSerializer
+from user.views import UsersViewSet
+from login.views import IntraAuthViewSet
 
 class ItemViewSet(viewsets.ModelViewSet):
 	queryset = Item.objects.all()
