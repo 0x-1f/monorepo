@@ -1,9 +1,17 @@
 import { t } from '/src/modules/locale/localeManager.js';
 import { getCookie } from '/src/modules/cookie/cookieManager.js';
 
-export function render(app, navigate) {
+function renderWaiting(app, me, rival = 0) {
 	app.innerHTML = `
-		<canvas id="pongCanvas" width="800px" height="600px" style="border: 1px solid #FFF">
+		<div class="grid">
+		<div class="grid-item-left" id="you">${me}</div>
+		<div class="grid-item-right" id="rival">${rival === 0 ? t('wait_part', 'Waiting for participations...') : rival}</div>
+	`;
+}
+
+function renderPongGame(app, match_url, me) {
+	app.innerHTML = `
+		<canvas id="pongCanvas" width="800px" height="400px" style="border: 1px solid #FFF">
 		Your browser does not support this game.
 		</canvas>
 		<div class="score-box" style="display: flex; align-items: center; justify-content: center;">
@@ -13,15 +21,7 @@ export function render(app, navigate) {
 		</div>
 	`;
 
-	const wsurl = getCookie('match_url');
-	if (wsurl === null) {
-		console.log('No match url found');
-		navigate('/404');
-	}
-    //
-    const intraID = getCookie('intraID');
-	//
-    const wss = new WebSocket(`wss://localhost${wsurl}${intraID}`);
+	const wss = new WebSocket(`ws://localhost${match_url}${me}`);
 
 	wss.onopen = function(e) {
 		console.log('WS Opened');
@@ -30,10 +30,6 @@ export function render(app, navigate) {
 	wss.onmessage = function(e) {
 		const gameState = JSON.parse(e.data);
 		drawGameState(gameState);
-	}
-
-	wss.onclose = function(e) {
-		console.log('WS Closed');
 	}
 
 	function drawGameState(gameState) {
@@ -74,6 +70,44 @@ export function render(app, navigate) {
 
 		movePaddle();
 	}
+}
+
+export function render(app, navigate) {
+	
+	renderWaiting(app, 'You');
+
+	const kimi_no_namae_wa = ["Kimi", "No", "Namae", "Wa"];
+	const 쑻쑻쑻 = Math.floor(Math.random()*kimi_no_namae_wa.length);
+	const wss = new WebSocket(`ws://localhost/ws/pong/join/${kimi_no_namae_wa[쑻쑻쑻]}`);
+
+	wss.onopen = function(e) {
+		console.log('Waiting for participations...');
+	}
+
+	wss.onmessage = function(e) {
+		const data = JSON.parse(e.data);
+		const match_url = data.match_url;
+		console.log(match_url);
+		renderPongGame(app, match_url, kimi_no_namae_wa[쑻쑻쑻]);
+	}
+
+
+	// const wss = new WebSocket(`ws://localhost:8081${wsurl}`);
+
+	// wss.onopen = function(e) {
+	// 	console.log('WS Opened');
+	// }
+
+	// wss.onmessage = function(e) {
+	// 	const gameState = JSON.parse(e.data);
+	// 	drawGameState(gameState);
+	// }
+
+	// wss.onclose = function(e) {
+	// 	console.log('WS Closed');
+	// }
+
+	
 
 	// let leftPaddleDirection = null, rightPaddleDirection = null;
 
