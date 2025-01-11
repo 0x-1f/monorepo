@@ -11,5 +11,20 @@
 	"result-t": "tournament record",
 	"result-d": "1:1 record",
 	"result-rps": "RPS record",
-	"loading": "loading..."
+	"loading": "loading...",
+
+    "rps-startMatching": "Start matching",
+    "rps-watingOpponent": "Waiting for opponent...",
+    "rps-cancelMatching": "Cancel matching",
+    "rps-gameMatched": "Game matched! Game starting...",
+    "rps-selection": "If you do not select in 10 seconds, a random selection will be made.",
+    "rps-watingResult": "Waiting for result...",
+    "rps-result-win": "You win!",
+    "rps-result-lose": "You lose!",
+    "rps-result-draw": "Draw!",
+    "ros-result-unknown": "Unknown result",
+
+	"2fa": "Two Factor Authentication",
+	"2fa-placeholder": "Enter 6-digit code",
+	"2fa-submit": "Submit"
 }

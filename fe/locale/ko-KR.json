@@ -11,5 +11,20 @@
 	"result-t": "토너먼트 전적",
 	"result-d": "1:1 전적",
 	"result-rps": "가위바위보 전적",
-	"loading": "로딩중..."
+	"loading": "로딩중...",
+
+    "rps-startMatching": "매칭 시작",
+    "rps-watingOpponent": "상대방을 기다리는 중...",
+    "rps-cancelMatching": "매칭 취소",
+    "rps-gameMatched": "게임 매칭 완료! 게임 시작...",
+    "rps-selection": "10초 내에 선택하지 않으면 무작위 선택이 이루어집니다.",
+    "rps-watingResult": "결과를 기다리는 중...",
+    "rps-result-win": "당신이 이겼습니다!",
+    "rps-result-lose": "당신이 졌습니다!",
+    "rps-result-draw": "비겼습니다!",
+    "ros-result-unknown": "알 수 없는 결과",
+
+	"2fa": "2단계 인증",
+	"2fa-placeholder": "6자리 코드를 입력하세요",
+	"2fa-submit": "제출"
 }

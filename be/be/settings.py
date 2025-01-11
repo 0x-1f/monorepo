@@ -159,3 +159,12 @@ REST_FRAMEWORK = {
 }
 
 ASGI_APPLICATION = 'be.asgi.application'
+
+# SMTP
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = config('SMTP_HOST', default="")
+EMAIL_PORT = config('SMTP_PORT', default="")
+EMAIL_USER = config('SMTP_ID', default="")
+EMAIL_PW = config('SMTP_PW', default="")
+
+JWT_SECRET_KEY = config('JWT_SECRET_KEY', default="")

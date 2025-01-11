@@ -25,6 +25,7 @@ window.addEventListener('storage', async (event) => {
 // Routing map for multi-depth routes
 const routes = {
     'login': () => import('./pages/login.js').then(module => module.render(app, navigate)),
+    '2fa': () => import('./pages/2fa.js').then(module => module.render(app, navigate)),
     'main': () => import('./pages/main.js').then(module => module.render(app, navigate)),
     'game': {
         'offline': {

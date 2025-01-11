@@ -1,8 +1,10 @@
 import requests
 
 from django.conf import settings
+from django.core.mail import send_mail
 from django.http import JsonResponse
 from django.shortcuts import redirect
+from django.utils.crypto import get_random_string
 from django.utils.http import urlencode
 
 from rest_framework import viewsets, status
@@ -66,7 +68,64 @@ class IntraAuthViewSet(viewsets.ModelViewSet):
             }
         )
 
+        try:
+            jwt_token = create_jwt_token(user_profile, settings.JWT_SECRET_KEY, 3)
+        except Exception as e:
+            return JsonResponse({"error": f"[Failed to create JWT token]: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        send_and_save_verification_code(user_profile)
         # redircet with cookie
-        response = redirect("https://localhost/main")
-        response.set_cookie("refresh_token", "token valllllue")
-        return response
+        return JsonResponse({'message': 'Verification code sent to email in intra'}, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=["post"], url_path="verify")
+    def verify_code(self, request):
+        code = request.data.get('code')
+        if not code:
+            return JsonResponse({'error': f"[Verification code is required]"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user_email = request.data.get('email')
+            user = Users.objects.get(email=user_email)
+
+            if user.verification_code == code:
+                jwt_token = create_jwt_token(user, settings.JWT_SECRET_KEY, 3)
+                return JsonResponse({'token': jwt_token}, status=status.HTTP_200_OK)
+            else:
+                return JsonResponse({'error': 'Verification code is invalid'}, status=status.HTTP_400_BAD_REQUEST)
+        except Users.DoesNotExist:
+            return JsonResponse({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return JsonResponse({'error': f"[{e.__class__.__name__}] {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+def send_and_save_verification_code(user):
+    verification_code = get_random_string(length=6)
+    user.verification_code = verification_code
+
+    mail_subject = "0x-1f 이메일 인증 코드입니다."
+    message = f'당신의 인증 코드는 {verification_code} 입니다.'
+    send_mail(mail_subject, message, settings.SMTP_ID, [user.email])
+
+def create_jwt_token(user: Users, secret_key, expire_days:int):
+    try:
+        payload = {
+            'user_email': user.email,
+            'exp': datetime.utcnow() + timedelta(days=expiration_days),
+        }
+        token = jwt.encode(payload, secret_key, algorithm='HS256')
+        token = token.decode('utf-8') if isinstance(token, bytes) else token
+        return token
+    except Exception as e:
+        raise Exception(f"[{e.__class__.__name__}] {str(e)}")
+
+# class CodeVerificationView(viewsets.ModelViewSet):
+#     def create(self, request):
+#         try:
+#             user = validate_jwt_token_and_get_user(request, settings.JWT_SECRET_KEY)
+#             verification_code = get_request_body_value(request, 'code')
+#             intra_id = user.intra_id
+#             is_new = True if intra_id is None else False
+
+#             if user.verification_code == verification_code:
+#                 jwt_token = create_jwt_token(user, JWT_AUTH_sECRET_KEY, 7)
+                
+#         except Exception as e:
+#             return JsonResponse({"error": f"[{e.__class__.__name__}] {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
