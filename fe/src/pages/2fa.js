@@ -8,6 +8,7 @@ export function render(app, navigate) {
 		<input type="text" id="2fa-input" placeholder="${t('2fa-placeholder', 'Enter 2FA code')}" maxlength="6" required>
 		<button type="submit" id="submit">${t('2fa-submit', 'Submit')}</button>
 	</form>
+	<p>${t('2fa-instruction', 'Please enter the 6-digit code from your authenticator app')}</p>
 	`;
 
 	document.getElementById('2fa-form').addEventListener('submit', async (e) => {
