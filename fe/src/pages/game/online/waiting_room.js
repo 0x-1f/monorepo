@@ -12,7 +12,10 @@ export function render(app, navigate) {
     // document.getElementById('you').addEventListener('click', () => navigate('game/online/2p'));
     // document.getElementById('rival').addEventListener('click', () => navigate('game/online/4p'));
 
-    const wss = new WebSocket('wss://localhost:8081/ws/pong');
+    //
+    const intraID = prompt('Enter your intra ID');
+    //
+    const wss = new WebSocket(`wss://localhost/ws/pong/${intraID}`);
 
     wss.onopen = function(e) {
 		console.log('Waiting for participations...');
@@ -23,6 +26,9 @@ export function render(app, navigate) {
 		const data = JSON.parse(e);
 		const match_url = data.match_url;
         setCookie('match_url', match_url);
+        //
+        setCookie('intraID', intraID);
+        //
 		navigate('game/online/2p/game');
 	}
 }
