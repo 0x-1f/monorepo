@@ -27,6 +27,7 @@ body {
   background-color: #000;
   color: #fff;
   flex-direction: column;
+  overflow: hidden;
 }
 
 #header {
