@@ -57,6 +57,9 @@ services:
       - "443:443"
     networks:
       - nw
+    depends_on:
+      - fe
+      - be
 
 volumes:
   postgres_data:
