@@ -16,4 +16,6 @@ EXPOSE 8081
 
 # Set the default command to run the Django development server
 # CMD ["python", "manage.py", "runserver", "0.0.0.0:8081"]
-CMD ["daphne", "-p", "8081" , "be.asgi:application"]
+# CMD ["daphne", "-p", "8081" , "be.asgi:application"]
+
+ENTRYPOINT ["./docker-entrypoint.sh"]

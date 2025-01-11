@@ -8,7 +8,6 @@ services:
       - be/.env
     ports:
       - "8081:8081"
-    command: ["./wait-for-it.sh", "db:5432", "--", "python", "manage.py", "runserver", "0.0.0.0:8081"]
     working_dir: /app
     volumes:
       - ./be:/app
