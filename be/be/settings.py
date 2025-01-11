@@ -49,6 +49,7 @@ INSTALLED_APPS = [
 
     'channels',
     'user',
+	'games',
 ]
 
 MIDDLEWARE = [
