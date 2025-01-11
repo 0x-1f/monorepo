@@ -33,10 +33,7 @@ const routes = {
             '2p': () => import('./pages/game/offline/2p.js').then(module => module.render(app, navigate)),
         },
         'online': {
-            '2p': {
-                'waiting_room': () => import('./pages/game/online/waiting_room.js').then(module => module.render(app, navigate)),
-                'game': () => import('./pages/game/online/2p.js').then(module => module.render(app, navigate)),
-            },
+            '2p': () => import('./pages/game/online/2p.js').then(module => module.render(app, navigate)),
             '4p': () => import('./pages/game/online/4p.js').then(module => module.render(app, navigate)),
         },
     },
@@ -46,7 +43,7 @@ const routes = {
         'dual': () => import('./pages/log/dual.js').then(module => module.render(app, navigate)),
         'rps': () => import('./pages/log/rps.js').then(module => module.render(app, navigate)),
     },
-    'rps': () => import('./pages/rps.js').then(module => module.render(app, navigate)),
+    'totallynotagame': () => import('./pages/totallynotagame.js').then(module => module.render(app, navigate)),
 };
 
 // Default error page
