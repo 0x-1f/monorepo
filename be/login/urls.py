@@ -1,10 +1,12 @@
-from django.urls import path
+from django.urls import path, include
 
-from .views import IntraLoginView, IntraCallbackView, Verification
+from rest_framework.routers import DefaultRouter
+
+from .views import IntraAuthViewSet
+
+router = DefaultRouter()
+router.register(r'auth', IntraAuthViewSet, basename="intra_auth")
 
 urlpatterns = [
-	path('intra/login/', IntraLoginView.as_view(), name="42login"),
-
-	path('intra/callback/', IntraCallbackView.as_view(), name="42callback"),
-	path('verify/', Verification.as_View(), name="verify_again"),
+	path('', include(router.urls)),
 ]

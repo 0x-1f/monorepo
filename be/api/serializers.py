@@ -6,11 +6,6 @@ class ItemSerializer(serializers.ModelSerializer):
         model = Item
         fields = '__all__'
 
-# class UserSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Users
-#         fields = ["id", "intra_id"]
-
 class PongSerializer(serializers.ModelSerializer):
     class Meta:
         model = PongGame
