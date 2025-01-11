@@ -18,6 +18,11 @@ export function renderHeader(header) {
         dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
     });
 
+    const currentUrl = window.location.href;
+    if (currentUrl.includes('/game')) {
+        document.getElementById('dropbtn').style.display = 'none';
+    }
+
     document.getElementById('en-US').addEventListener('click', () => {
         changeLocale('en-US');
     });
