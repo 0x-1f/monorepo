@@ -4,7 +4,6 @@ from .views import ItemViewSet, PongViewSet
 from login.views import IntraAuthViewSet
 
 router = DefaultRouter()
-router.register(r'items', ItemViewSet)
 router.register(r'pong', PongViewSet, basename="pong")
 router.register(r'auth', IntraAuthViewSet, basename="login")
 # router.register(r'rsp', RSPViewSet, basename="rsp")
