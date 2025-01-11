@@ -3,4 +3,10 @@ FROM nginx:latest
 # copy nginx.conf to the container
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
+RUN mkdir /etc/nginx/ssl
+RUN openssl req -newkey rsa:4096 -x509 -sha256 -days 365 -nodes \
+    -out /etc/nginx/ssl/junmoon.crt \
+    -keyout /etc/nginx/ssl/junmoon.key \
+    -subj "/C=KR/ST=Seoul/L=Seoul/O=42Seoul/OU=junmoon/CN=junmoon/"
+
 CMD ["nginx", "-g", "daemon off;"]
