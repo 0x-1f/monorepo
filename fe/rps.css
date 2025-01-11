@@ -19,8 +19,8 @@
 
 /* 가위바위보 시작 페이지(카운트다운) */
 .rps-counter {
-  font-size: 2em;
-  margin-bottom: 1em;
+  font-size: 3em;
+  margin-bottom: 0.5em;
 }
 
 /* 3열 그리드 컨테이너 */
@@ -64,7 +64,7 @@
 
 /* 10초 미선택 시 랜덤처리 안내 문구 */
 .rps-warning-text {
-  font-size: 0.9em;
+  font-size: 1.5em;
   margin-top: 1em;
   opacity: 0.8;
 }

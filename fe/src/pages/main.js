@@ -8,7 +8,7 @@ export function render(app, navigate) {
             <div class="grid-item-left" id="offline-2p">${t('local1v1', 'Local Duel')}</div>
             <div class="grid-item-right" id="offline-ai">${t('localAI', 'AI Battle')}</div>
             <div class="grid-item-left" id="scoreboard">${t('scoreboard', 'Scoreboard')}</div>
-            <div class="grid-item-right" id="totallynotagame">${t('totallynotagame', 'Totally Not a Game')}</div>
+            <div class="grid-item-right" id="rps">${t('rps', 'Rock, Paper, Scissors')}</div>
         </div>
     `;
 
@@ -17,7 +17,7 @@ export function render(app, navigate) {
     document.getElementById('offline-2p').addEventListener('click', () => navigate('game/offline/2p'));
     document.getElementById('offline-ai').addEventListener('click', () => navigate('game/offline/ai'));
     document.getElementById('scoreboard').addEventListener('click', () => navigate('log/main'));
-    document.getElementById('totallynotagame').addEventListener('click', () => navigate('totallynotagame'));
+    document.getElementById('rps').addEventListener('click', () => navigate('rps'));
 
     const konamiCode = [
         'ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown',
