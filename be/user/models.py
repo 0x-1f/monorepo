@@ -4,6 +4,7 @@ from django.utils.timezone import now
 class Users(models.Model):
 	user_id = models.AutoField(primary_key=True)
 	intra_id = models.CharField(max_length=255, unique=True)
+	email = models.CharField(max_length=255, default="")
 	refresh_token = models.CharField(max_length=255, default="")
 	access_token = models.CharField(max_length=255, default="")
 	register_date = models.DateTimeField(default=now)

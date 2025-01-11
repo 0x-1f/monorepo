@@ -53,6 +53,7 @@ class IntraAuthViewSet(viewsets.ModelViewSet):
             return JsonResponse({"error": f"[Failed to fetch user data]: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         intra_id = user_data.get("login")
+        email = user_data.get("email")
         if not intra_id:
             return JsonResponse({"error": f"[user data missing]"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -61,6 +62,7 @@ class IntraAuthViewSet(viewsets.ModelViewSet):
             defaults={
                 "refresh_token": refresh_token,
                 "access_token": access_token,
+                "email": email,
             }
         )
 
