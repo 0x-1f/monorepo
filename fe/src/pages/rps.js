@@ -14,6 +14,15 @@ export function render(app, navigate) {
     renderStartPage(app, navigate);
     cleanupAllWebSockets();
     // renderRpsGamePage(app);
+
+    window.onpopstate = function (event) {
+        if (wss && wss.readyState === WebSocket.OPEN) {
+            wss.close();
+        }
+        if (matchWss && matchWss.readyState === WebSocket.OPEN) {
+            matchWss.close();
+        }
+    };
 }
 
 /** 1) 최초 화면: "start matching" 버튼만 있는 화면 */
