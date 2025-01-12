@@ -14,6 +14,11 @@ export function render(app, navigate) {
 	document.getElementById('2fa-form').addEventListener('submit', async (e) => {
 		e.preventDefault();
 		const code = document.getElementById('2fa-input').value;
+		const invalidChars = /[^a-zA-Z0-9]/g;
+		if (invalidChars.test(code)) {
+			alert(t('2fa-invalid', 'Invalid 2FA code'));
+			return;
+		}
 		if (code.length !== 6) {
 			alert(t('2fa-invalid', 'Invalid 2FA code'));
 			return;
