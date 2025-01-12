@@ -144,7 +144,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 API_UID = config("API_UID", default="")
 API_SECRET = config("API_SECRET", default="")
 
-REDIRECT_URI = config("REDIRECT_URI", default="")
+BASE_URL = config("BASE_URL", default="")
+
+REDIRECT_URI = config("BASE_URL", default="") + "/2fa"
 AUTH_URL=config("AUTH_URL", default="")
 TOKEN_URL=config("TOKEN_URL", default="")
 API_BASE_URL=config("API_BASE_URL", default="")

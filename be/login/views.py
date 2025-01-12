@@ -15,7 +15,7 @@ from rest_framework.decorators import action
 
 from user.models import Users
 
-CALLBACK_URI = "http://localhost/api/auth/callback"
+CALLBACK_URI = settings.BASE_URL + "/api/auth/callback"
 REDIRECT_URI = settings.REDIRECT_URI
 AUTH_URL = settings.AUTH_URL
 TOKEN_URL = settings.TOKEN_URL
