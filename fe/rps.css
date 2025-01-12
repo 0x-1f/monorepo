@@ -86,6 +86,7 @@
   grid-template-columns: 1fr 1fr;
   align-items: center;
   margin-bottom: 2em;
+  width: 100%; /* 전체 너비 사용 */
 }
 
 /* 내 쪽, 상대 쪽 */
@@ -96,8 +97,18 @@
   gap: 1em;
 }
 
+/* 내 쪽 정렬: 하얀색 패들을 왼쪽 끝에 배치 */
 .rps-my-side {
+  justify-content: flex-start;
+  width: 100%; /* 필요 시 넓이를 전체로 지정 */
+  /*padding-left: 100px; /* 패들과 이미지 사이 여백 */
+}
+
+/* 상대방 쪽 정렬: 하얀색 패들을 오른쪽 끝에 배치 */
+.rps-opp-side {
   justify-content: flex-end;
+  width: 100%; /* 필요 시 넓이를 전체로 지정 */
+  /*padding-right: 100px; /* 패들과 이미지 사이 여백 */
 }
 
 .rps-my-paddle {
@@ -106,7 +117,7 @@
   background-color: white;
 }
 
-.rps-opponent-paddle {
+.rps-opp-paddle {
   width: 10px;
   height: 100px;
   background-color: white;

@@ -215,7 +215,7 @@ function renderResultPage(app, navigate, result, opponentChoice, opponentId) {
 
     // 상대방 쪽
     const oppSide = document.createElement("div");
-    oppSide.className = "rps-side";
+    oppSide.classList.add("rps-side", "rps-opp-side");
 
     const oppImg = document.createElement("img");
     oppImg.className = "rps-img";
@@ -225,7 +225,7 @@ function renderResultPage(app, navigate, result, opponentChoice, opponentId) {
     oppIdDiv.textContent = opponentId;
 
     const oppPaddle = document.createElement("div");
-    oppPaddle.className = "rps-opponent-paddle";
+    oppPaddle.className = "rps-opp-paddle";
 
     oppSide.appendChild(oppImg);
     oppSide.appendChild(oppIdDiv);
@@ -242,7 +242,6 @@ function renderResultPage(app, navigate, result, opponentChoice, opponentId) {
     mainBtn.classList.add("btn", "btn-warning", "rps-main-btn");
 
     mainBtn.addEventListener("click", () => {
-        cleanupAllWebSockets();
         navigate("main");
     });
 
@@ -288,6 +287,7 @@ function connectMatchWebSocket(app, navigate, matchUrl) {
         else if (data.status === "finished") {
             const opponentId = getOpponentIdFromMatchName(matchName);
             renderResultPage(app, navigate, data.result, data.opponent_choice, opponentId);
+            cleanupAllWebSockets();
         }
     };
 }
