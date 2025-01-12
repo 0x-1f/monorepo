@@ -6,7 +6,7 @@ from .views import PongViewSet, RPSViewSet
 
 router = DefaultRouter()
 router.register(r'pong', PongViewSet)
-router.register(r'rps', RPSViewSet)
+router.register(r'rps', RPSViewSet, basename='rps')
 
 urlpatterns = [
 	path('', include(router.urls)),
