@@ -22,7 +22,7 @@ function gameRoom(app, match_url, me) {
     `;
 
     const wss = new WebSocket(`wss://localhost${match_url}${me}`);
-	
+
     wss.onopen = function(e) {
 		console.log('WS Opened');
 	}
@@ -73,12 +73,12 @@ function gameRoom(app, match_url, me) {
 
     document.addEventListener("keydown", function (e) {
         if (!wss) return;
-  
+
         // w -> 위로 이동, s -> 아래로 이동
-        if (e.key === "w" || "ArrowUp") {
+        if (e.key === "w" || e.key === "ArrowUp") {
           // {"move":["up"]} 전송
           wss.send(JSON.stringify({ "move" : "up" }));
-        } else if (e.key === "s" || "ArrowDown") {
+        } else if (e.key === "s" || e.key === "ArrowDown") {
           // {"move":["down"]} 전송
           wss.send(JSON.stringify({ "move" : "down" }));
         }
