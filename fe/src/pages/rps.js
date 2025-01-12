@@ -32,12 +32,21 @@ function renderStartPage(app, navigate) {
 
     startBtn.addEventListener("click", () => {
         // intra_id 를 입력 받는다.
-        intraId = prompt("Enter your intra_id");
-        if (!intraId) {
-            alert("intra_id is required!");
-            return;
-        }
-        startMatching(app, navigate);
+        // intraId = prompt("Enter your intra_id");
+        // if (!intraId) {
+        //     alert("intra_id is required!");
+        //     return;
+        // }
+        fetch('/api/auth/get_intra_id/', {
+            credentials: 'include',
+        }).then(response => {
+            if (response.ok) {
+                return response.json();
+            }
+        }).then(data => {
+            intraId = data.intra_id;
+            startMatching(app, navigate);
+        })
     });
 
     container.appendChild(startBtn);

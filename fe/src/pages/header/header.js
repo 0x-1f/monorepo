@@ -19,6 +19,14 @@ export function renderHeader(header) {
         window.location.href = '/login';
     }
 
+    if (fetch('/api/auth/check_expired', {
+        credentials: 'include',
+    }).then(response => {
+        if (!response.ok) {
+            navigate('2fa');
+        }
+    }));
+
     document.getElementById('dropbtn').addEventListener('click', () => {
         const dropdown = document.getElementById('dropdowncontent');
         dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';

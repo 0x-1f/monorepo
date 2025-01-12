@@ -9,7 +9,13 @@ export function render(app, navigate) {
         window.location.href = 'http://localhost/api/auth/login';
     });
 
-    if (getCookie('jwt')) {
-        navigate('main');
-    }
+    if (fetch('/api/auth/check_expired', {
+        credentials: 'include',
+    }).then(response => {
+        if (!response.ok) {
+            navigate('2fa');
+        } else {
+            navigate('main');
+        }
+    }));
 }
