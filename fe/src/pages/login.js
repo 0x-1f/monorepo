@@ -12,10 +12,8 @@ export function render(app, navigate) {
     if (fetch('/api/auth/check_expired', {
         credentials: 'include',
     }).then(response => {
-        if (!response.ok) {
+        if (response.status === 400) {
             navigate('2fa');
-        } else {
-            navigate('main');
         }
     }));
 }
