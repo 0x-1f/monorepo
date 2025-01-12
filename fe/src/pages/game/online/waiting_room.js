@@ -51,5 +51,9 @@ export function render(app, navigate) {
 	});
 	//
 
-
+	window.onpopstate = function(event) {
+		if (wss.readyState === wss.OPEN) {
+			wss.close(); // 필요하면 닫기
+		}
+	};
 }
