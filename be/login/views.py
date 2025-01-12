@@ -149,7 +149,7 @@ def create_jwt_token(user: Users, secret_key, expire_days:int):
     try:
         payload = {
             'user_email': user.email,
-            'exp': datetime.utcnow() + timedelta(seconds=expire_days * 60),
+            'exp': datetime.utcnow() + timedelta(days=expire_days),
         }
         token = jwt.encode(payload, secret_key, algorithm='HS256')
         token = token.decode('utf-8') if isinstance(token, bytes) else token
