@@ -12,7 +12,7 @@ export function render(app, navigate) {
         </div>
     `;
 
-    document.getElementById('online-2p').addEventListener('click', () => navigate('game/online/2p/waiting_room'));
+    document.getElementById('online-2p').addEventListener('click', () => navigate('game/online/2p'));
     document.getElementById('online-4p').addEventListener('click', () => navigate('game/online/4p'));
     document.getElementById('offline-2p').addEventListener('click', () => navigate('game/offline/2p'));
     document.getElementById('offline-ai').addEventListener('click', () => navigate('game/offline/ai'));
