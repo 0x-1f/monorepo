@@ -60,13 +60,17 @@ function gameRoom(app, match_url, me) {
 			100
 		);
 
+        const parts = match_url.split('/');
+        const lastPart = parts[parts.length - 2];
+        const [leftUser, rightUser] = lastPart.split('_');
+
 		ctx.fillStyle = 'white';
 		ctx.font = '20px Arial';
-		ctx.fillText('Player 1', 20, 30);
-		ctx.fillText('Player 2', canvas.width - 120, 30);
+		ctx.fillText(leftUser, 20, 30);
+		ctx.fillText(rightUser, canvas.width - 120, 30);
 
-		leftScore.innerText = gameState.scores.player1;
-		rightScore.innerText = gameState.scores.player2;
+		leftScore.innerText = gameState.left_score;
+		rightScore.innerText = gameState.right_score;
 
 		movePaddle();
 	}
