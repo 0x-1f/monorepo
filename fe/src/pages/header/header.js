@@ -1,4 +1,5 @@
 import { changeLocale } from "../../modules/locale/localeManager";
+import { getCookie } from "../../modules/cookie/cookieManager";
 
 export function renderHeader(header) {
     header.innerHTML = `
@@ -13,13 +14,18 @@ export function renderHeader(header) {
         </header>
     `;
 
+    const jwt = getCookie('jwt');
+    if (!jwt && window.location.pathname !== '/login') {
+        window.location.href = '/login';
+    }
+
     document.getElementById('dropbtn').addEventListener('click', () => {
         const dropdown = document.getElementById('dropdowncontent');
         dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
     });
 
     const currentUrl = window.location.href;
-    if (currentUrl.includes('/game')) {
+    if (currentUrl.includes('/game') || currentUrl.includes('/rps')) {
         document.getElementById('dropbtn').style.display = 'none';
     }
 

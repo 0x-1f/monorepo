@@ -77,6 +77,7 @@ class IntraAuthViewSet(viewsets.ModelViewSet):
         except Exception as e:
             return JsonResponse({"error": f"[Failed to create JWT token]: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         send_and_save_verification_code(user_profile)
+
         response = redirect(REDIRECT_URI)
         response.set_cookie('jwt', jwt_token)
         return response
@@ -89,12 +90,15 @@ class IntraAuthViewSet(viewsets.ModelViewSet):
         jwt_token = request.data.get('jwt')
         payload = jwt.decode(jwt_token, settings.JWT_SECRET_KEY, algorithms=['HS256'])
         user_email = payload.get('user_email')
+
         try:
-            user_email = request.data.get('email')
             user = Users.objects.get(email=user_email)
+
             if user.verification_code == code:
                 jwt_token = create_jwt_token(user, settings.JWT_SECRET_KEY, 3)
-                return JsonResponse({'token': jwt_token}, status=status.HTTP_200_OK)
+                response = JsonResponse({'message': 'Verification success'},status=status.HTTP_200_OK)
+                response.set_cookie('jwt', jwt_token)
+                return response
             else:
                 return JsonResponse({'error': 'Verification code is invalid'}, status=status.HTTP_400_BAD_REQUEST)
         except Users.DoesNotExist:

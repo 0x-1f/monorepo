@@ -157,18 +157,21 @@ class RPSGameManager:
 
 	async def save_choice(self, player, choice):
 		print(f"saved {player}'s choice: {choice}")
-		self.choice[player] = choice
-		if len(self.choice) == 2:
-			self.calculate_result()
+		async with asyncio.Lock():
+			self.choice[player] = choice
+			length = len(self.choice)
+		if length == 2:
+			await self.calculate_result()
 			await self.change_status("saving")
 			await self.finish_game()
 
-	def get_state(self):
-		return {
-			"status": self.status,
-			"result": self.result,
-			"choice": self.choice,
-		}
+	async def get_data(self):
+		async with asyncio.Lock():
+			return {
+				"status": self.status,
+				"result": self.result,
+				"choice": self.choice,
+			}
 
 	async def change_status(self, new_status):
 		async with asyncio.Lock():
@@ -176,7 +179,7 @@ class RPSGameManager:
 			self.status = new_status
 
 
-	def calculate_result(self):
+	async def calculate_result(self):
 		self.result["player1"] = "win"
 		self.result["player2"] = "lose"
 		if self.choice["player1"] == self.choice["player2"]:
