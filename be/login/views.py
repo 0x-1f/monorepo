@@ -115,8 +115,8 @@ class IntraAuthViewSet(viewsets.ModelViewSet):
         else:
             return JsonResponse({'message': 'Token is valid'}, status=status.HTTP_200_OK)
 
-    @action(datail=False, methods=["get"], url_path="find_user")
-    def find_user(self, request):
+    @action(datail=False, methods=["get"], url_path="get_intra_id")
+    def get_intra_id(self, request):
         jwt_token = request.COOKIES.get('jwt')
         if not jwt_token:
             return JsonResponse({'error': 'JWT token not found'}, status=status.HTTP_404_NOT_FOUND)
