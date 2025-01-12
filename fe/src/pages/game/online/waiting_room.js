@@ -23,6 +23,27 @@ export function render(app, navigate) {
 				navigate('main');
 			} else {
 				wss = new WebSocket(`wss://localhost/ws/pong/join/${data.intra_id}`);
+			 	const intra_id = data.intra_id
+				console.log(wss)
+				console.log('websocket connected')
+
+				wss.onopen = function(e) {
+					console.log('Waiting for participations...');
+				}
+
+				wss.onmessage = function(e) {
+					console.log(e.data);
+					const data = JSON.parse(e.data);
+					const match_url = data.match_url;
+					setCookie('match_url', match_url);
+					console.log('setCookie: match_url')
+					console.log(match_url)
+					//
+					setCookie('intraID', intra_id);
+					console.log('setCookie: intraID')
+					//
+					navigate('game/online/2p/game');
+				}
 			}
 		});
 	}).catch(error => {
@@ -30,18 +51,5 @@ export function render(app, navigate) {
 	});
 	//
 
-    wss.onopen = function(e) {
-		console.log('Waiting for participations...');
-	}
 
-	wss.onmessage = function(e) {
-		console.log(e);
-		const data = JSON.parse(e.data);
-		const match_url = data.match_url;
-        setCookie('match_url', match_url);
-        //
-        setCookie('intraID', intraID);
-        //
-		navigate('game/online/2p/game');
-	}
 }

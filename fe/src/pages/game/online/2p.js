@@ -18,10 +18,18 @@ export function render(app, navigate) {
 		console.log('No match url found');
 		navigate('/404');
 	}
+
+	const intraId = getCookie('intraID');
     //
-    const intraID = getCookie('intraID');
+    function extractMatchName(wsurl) {
+        const splitted1 = wsurl.split('/');
+        const matchName = splitted1[splitted1.length - 2];
+		return matchName.split('_');
+    }
+	const matchNames = extractMatchName(wsurl);
+
 	//
-    const wss = new WebSocket(`wss://localhost${wsurl}${intraID}`);
+    const wss = new WebSocket(`wss://localhost${wsurl}${intraId}`);
 
 	wss.onopen = function(e) {
 		console.log('WS Opened');
@@ -66,11 +74,11 @@ export function render(app, navigate) {
 
 		ctx.fillStyle = 'white';
 		ctx.font = '20px Arial';
-		ctx.fillText('Player 1', 20, 30);
-		ctx.fillText('Player 2', canvas.width - 120, 30);
+		ctx.fillText(matchNames[0], 20, 30);
+		ctx.fillText(matchNames[1], canvas.width - 120, 30);
 
-		leftScore.innerText = gameState.scores.player1;
-		rightScore.innerText = gameState.scores.player2;
+		leftScore.innerText = gameState.left_score;
+		rightScore.innerText = gameState.right_score;
 
 		movePaddle();
 	}
@@ -95,7 +103,7 @@ export function render(app, navigate) {
     //임시 키보드 이벤트 감지 코드
     document.addEventListener("keydown", function (e) {
         if (!wss) return;
-  
+
         // w -> 위로 이동, s -> 아래로 이동
         if (e.key === "w") {
           // {"move":["up"]} 전송
