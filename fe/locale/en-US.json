@@ -1,6 +1,6 @@
 {
 	"online1v1": "1vs1 Online",
-	"online2v2": "2vs2 Online",
+	"local4pTournament": "4p Local Tournament",
 	"local1v1": "1vs1 Local",
 	"localAI": "AI Battle",
 	"error": "Your game ran into a problem and needs to restart as soon as we're finished collecting some error info.",
@@ -13,6 +13,14 @@
 	"result-rps": "RPS record",
 	"loading": "loading...",
 
+    "4p-inputName": "Enter each player's name",
+    "4p-start": "Start the tournament",
+    "4p-result": "Tournament result",
+    "4p-winner": "Winner",
+    "4p-2nd": "2nd place",
+    "4p-3rd": "3rd place",
+    "4p-main" : "Main",
+
     "rps-startMatching": "Start matching",
     "rps-watingOpponent": "Waiting for opponent...",
     "rps-cancelMatching": "Cancel matching",
@@ -22,7 +30,7 @@
     "rps-result-win": "You win!",
     "rps-result-lose": "You lose!",
     "rps-result-draw": "Draw!",
-    "ros-result-unknown": "Unknown result",
+    "rps-result-unknown": "Unknown result",
 
 	"2fa": "Two Factor Authentication",
 	"2fa-placeholder": "Enter 6-digit code",

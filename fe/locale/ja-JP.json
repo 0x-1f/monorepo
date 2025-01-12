@@ -1,6 +1,6 @@
 {
 	"online1v1": "オンライン1vs1",
-	"online2v2": "オンライン2vs2",
+	"local4pTournament": "ローカル4人トーナメント",
 	"local1v1": "ローカル1vs1",
 	"localAI": "ローカルAI",
 	"error":"ゲームに問題が発生したため、 再起動する必要があります。エラー情報を収集しています。 自動的に再起動します。",
@@ -13,6 +13,14 @@
 	"result-rps": "じゃんけん戦績",
 	"loading": "読み込み中...",
 
+    "4p-inputName": "各プレイヤーの名前を入力してください",
+    "4p-start": "トーナメントを開始",
+    "4p-result": "トーナメント結果",
+    "4p-winner": "優勝",
+    "4p-2nd": "2位",
+    "4p-3rd": "3位",
+    "4p-main" : "メイン",
+
     "rps-startMatching": "マッチング開始",
     "rps-watingOpponent": "対戦相手を待っています...",
     "rps-cancelMatching": "マッチングキャンセル",
@@ -22,7 +30,7 @@
     "rps-result-win": "あなたの勝ちです！",
     "rps-result-lose": "あなたの負けです！",
     "rps-result-draw": "引き分けです！",
-    "ros-result-unknown": "不明な結果",
+    "rps-result-unknown": "不明な結果",
 
 	"2fa": "2段階認証",
 	"2fa-placeholder": "6桁のコードを入力してください",
