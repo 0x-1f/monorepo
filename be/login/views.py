@@ -111,8 +111,10 @@ class IntraAuthViewSet(viewsets.ModelViewSet):
         jwt_token = request.COOKIES.get('jwt')
         if not jwt_token:
             return JsonResponse({'error': 'JWT token not found'}, status=status.HTTP_404_NOT_FOUND)
-        payload = jwt.decode(jwt_token, settings.JWT_SECRET_KEY, algorithms=['HS256'])
-        print(f"payload: {payload}", flush=True)
+        try:
+            payload = jwt.decode(jwt_token, settings.JWT_SECRET_KEY, algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            return JsonResponse({'message': 'Token is expired'}, status=status.HTTP_400_BAD_REQUEST)
         exp_date = datetime.fromtimestamp(payload.get('exp'))
         if exp_date < datetime.utcnow():
             return JsonResponse({'message': 'Token is expired'}, status=status.HTTP_400_BAD_REQUEST)
@@ -124,7 +126,10 @@ class IntraAuthViewSet(viewsets.ModelViewSet):
         jwt_token = request.COOKIES.get('jwt')
         if not jwt_token:
             return JsonResponse({'error': 'JWT token not found'}, status=status.HTTP_404_NOT_FOUND)
-        payload = jwt.decode(jwt_token, settings.JWT_SECRET_KEY, algorithms=['HS256'])
+        try:
+            payload = jwt.decode(jwt_token, settings.JWT_SECRET_KEY, algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            return JsonResponse({'error': 'Token is expired'}, status=status.HTTP_400_BAD_REQUEST)
         user = Users.objects.get(email=payload.get('user_email'))
         if not user:
             return JsonResponse({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
