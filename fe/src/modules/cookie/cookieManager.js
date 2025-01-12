@@ -40,3 +40,7 @@ export function getCookie(name) {
     }
     return null; // Cookie not found
 }
+
+export function removeCookie(name) {
+    setCookie(name, '', { expires: new Date(0) });
+}

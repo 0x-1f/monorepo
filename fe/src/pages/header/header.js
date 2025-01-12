@@ -1,5 +1,5 @@
 import { changeLocale } from "../../modules/locale/localeManager";
-import { getCookie } from "../../modules/cookie/cookieManager";
+import { getCookie, removeCookie } from "../../modules/cookie/cookieManager";
 
 export function renderHeader(header) {
     header.innerHTML = `
@@ -23,6 +23,7 @@ export function renderHeader(header) {
         credentials: 'include',
     }).then(response => {
         if (response.status === 400) {
+            removeCookie('jwt');
             navigate('2fa');
         }
     }));

@@ -113,4 +113,10 @@ export function render(app, navigate) {
           wss.send(JSON.stringify({ "move" : "down" }));
         }
       });
+
+	  window.onpopstate = function(event) {
+		if (webSocket.readyState === WebSocket.OPEN) {
+			webSocket.close(); // 필요하면 닫기
+		}
+	};
 }
