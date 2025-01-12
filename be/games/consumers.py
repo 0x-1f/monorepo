@@ -8,7 +8,7 @@ from .game_managers import PongGameManager, RPSGameManager
 # from .models import PongGame
 # from user.models import Users
 
-fps = 40
+fps = 60
 time_limit = 10
 
 pong_queue = []
@@ -34,10 +34,15 @@ class PongQueueConsumer(AsyncWebsocketConsumer):
 		# if isinstance(user, AnonymousUser) or not user.is_authenticated:
         #     await self.close()  # 인증되지 않은 사용자의 연결을 거부
 		# else:
-		await self.accept()  # 인증된 사용자의 경우, 웹소켓 연결 수락
 
 		async with pong_queue_lock:  # lock 걸고 큐에 사용자 추가
-			pong_queue.append(self.intra_id)
+			if self.intra_id in pong_queue:
+				await self.close()
+				return
+			else:
+				await self.accept()  # 인증된 사용자의 경우, 웹소켓 연결 수락
+				pong_queue.append(self.intra_id)
+
 		self.status = "waiting"
 		self.user1_intra_id = "none"
 		self.user2_intra_id = "none"
@@ -111,6 +116,7 @@ class PongMatchConsumer(AsyncWebsocketConsumer):
 		# if isinstance(user, AnonymousUser) or not user.is_authenticated:
         #     await self.close()  # 인증되지 않은 사용자의 연결을 거부
 		# else:
+
 		await self.accept()  # 인증된 사용자의 경우, 웹소켓 연결 수락
 		print(f"{self.intra_id} is ready")
 
@@ -136,6 +142,7 @@ class PongMatchConsumer(AsyncWebsocketConsumer):
 
 	async def disconnect(self, close_code):
 		global pong_game_rooms
+		self.running_task.cancel()
 		async with asyncio.Lock():
 			if self.match_name in pong_game_rooms and pong_game_rooms[self.match_name].players_connection[self.role] == "on":
 				pong_game_rooms[self.match_name].players_connection[self.role] = "off"
@@ -160,6 +167,10 @@ class PongMatchConsumer(AsyncWebsocketConsumer):
 			self.timer += 1/fps
 		if time_limit <= self.timer:
 			pong_game_rooms[self.match_name].change_status("network_error")
+			await self.send(text_data=json.dumps(
+				pong_game_rooms[self.match_name].get_state()
+			))
+			await self.close()
 		while pong_game_rooms[self.match_name].status == "playing":
 			await asyncio.sleep(1/fps)
 			# print("playing")
@@ -167,13 +178,13 @@ class PongMatchConsumer(AsyncWebsocketConsumer):
 			await self.send(text_data=json.dumps(
 				pong_game_rooms[self.match_name].get_state()
 			))
-		while pong_game_rooms[self.match_name].status == "saving":
+		while pong_game_rooms[self.match_name].status != "saved":
 			# print("saving the result...")
 			await asyncio.sleep(1)
 		await self.send(text_data=json.dumps(
 				pong_game_rooms[self.match_name].get_state()
 		))
-		await self.disconnect(1000)
+		await self.close()
 
 
 class RPSQueueConsumer(AsyncWebsocketConsumer):
@@ -185,10 +196,13 @@ class RPSQueueConsumer(AsyncWebsocketConsumer):
 		# if isinstance(user, AnonymousUser) or not user.is_authenticated:
         #     await self.close()  # 인증되지 않은 사용자의 연결을 거부
 		# else:
-		await self.accept()  # 인증된 사용자의 경우, 웹소켓 연결 수락
-
 		async with rps_queue_lock:  # lock 걸고 큐에 사용자 추가
-			rps_queue.append(self.intra_id)
+			if self.intra_id in rps_queue:
+				self.close()
+				return
+			else:
+				await self.accept()  # 인증된 사용자의 경우, 웹소켓 연결 수락
+				rps_queue.append(self.intra_id)
 		self.status = "waiting"
 		self.user1_intra_id = "none"
 		self.user2_intra_id = "none"
@@ -314,6 +328,7 @@ class RPSMatchConsumer(AsyncWebsocketConsumer):
 			print(f"{self.intra_id} is waiting ... for {self.timer}")
 		if time_limit <= self.timer:
 			await rps_game_rooms[self.match_name].change_status("network_error")
+			await self.close()
 		else:
 			# 시작신호 주고 10(?!)초 기다리기 (프론트에서 카운트 다운)//
 			await self.send(text_data=json.dumps(
@@ -326,6 +341,13 @@ class RPSMatchConsumer(AsyncWebsocketConsumer):
 			await asyncio.sleep(1)
 			print(f"{self.intra_id} is playing....")
 
+		# 저장하는동안 대기
+		# await rps_game_rooms[self.match_name].finish_game()
+
+		while await rps_game_rooms[self.match_name].get_status() == "saving":
+			await asyncio.sleep(1)
+			print(f"{self.intra_id} is saving...")
+
 		# 저장완료후 결과 보내기
 		data = await rps_game_rooms[self.match_name].get_data()
 		await self.send(text_data=json.dumps(
@@ -336,15 +358,6 @@ class RPSMatchConsumer(AsyncWebsocketConsumer):
 			}
 		))
 		await self.close()
-
-		# await rps_game_rooms[self.match_name].finish_game()
-
-
-		# 저장하는동안 대기
-		while await rps_game_rooms[self.match_name].get_status() == "saving":
-			await asyncio.sleep(1)
-			print(f"{self.intra_id} is saving...")
-
 
 
 

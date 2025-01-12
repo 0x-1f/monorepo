@@ -3,7 +3,7 @@ from asgiref.sync import sync_to_async
 from .models import PongGame, RPSGame
 from user.models import Users
 
-fps = 40
+fps = 60
 
 class PongGameManager:
 	def __init__(self):
@@ -19,13 +19,13 @@ class PongGameManager:
 		self.canvas_width = 800
 		self.canvas_height = 600
 
-		self.paddle_width = 10
+		self.paddle_width = 12
 		self.paddle_height = 100
 		self.paddle_positions = {
 			"player1": (self.canvas_height - self.paddle_height) / 2,
 			"player2": (self.canvas_height - self.paddle_height) / 2
 			}
-		self.paddle_speed = 12
+		self.paddle_speed = 14
 		self.ball= {"x": self.canvas_width / 2, "y": self.canvas_height / 2}
 		self.ballRadius = 10
 		self.ball_speed = {"x": 5, "y": 5}
@@ -51,29 +51,26 @@ class PongGameManager:
 				self.ball["y"] = self.canvas_height - self.ballRadius; # 공위치 정정
 				self.ball_speed["y"] *= -1; # 반대로 움직임
 
-			# 왼쪽 벽에 닿는지 확인
-			if self.ball["x"] - self.ballRadius <= 0:
+			# 왼쪽 패들에 닿는지 확인
+			if self.ball["x"] - self.ballRadius <= self.paddle_width:
 				if self.paddle_positions["player1"] <= self.ball["y"] and self.ball["y"] <= self.paddle_positions["player1"] + self.paddle_height:
 					self.ball["x"] = self.paddle_width + self.ballRadius # 공위치 정정
 					self.ball_speed["x"] *= -1 # 반대로 움직임
-				else: # 오른쪽 플레이어 득점
-					self.scores[1] += 1
-					self.ball= {"x": self.canvas_width / 2, "y": self.canvas_height / 2} #공위치 초기화
-
-			# 오른쪽 벽에 닿는지 확인
-			if self.ball["x"] + self.ballRadius >= self.canvas_width:
+			elif self.ball["x"] + self.ballRadius >= self.canvas_width - self.paddle_width:
 				if self.paddle_positions["player2"] <= self.ball["y"] and self.ball["y"] <= self.paddle_positions["player2"] + self.paddle_height:
 					self.ball["x"] = self.canvas_width - self.paddle_width - self.ballRadius # 공위치 정정
 					self.ball_speed["x"] *= -1 # 반대로 움직임
-				else: # 오른쪽 플레이어 득점
-					self.scores[0] += 1
-					self.ball= {"x": self.canvas_width / 2, "y": self.canvas_height / 2} #공위치 초기화
+
+			# 왼쪽 벽에 닿으면 오른쪽 득점, 오른쪽 벽에 닿으면 왼쪽 득점
+			if self.ball["x"] - self.ballRadius <= 0:
+				self.scores[1] += 1
+				self.ball= {"x": self.canvas_width / 2, "y": self.canvas_height / 2} #공위치 초기화
+			elif self.ball["x"] + self.ballRadius >= self.canvas_width:
+				self.scores[0] += 1
+				self.ball= {"x": self.canvas_width / 2, "y": self.canvas_height / 2} #공위치 초기화
 
 			await asyncio.sleep(1/fps)
 		await self.finish_game()
-		await asyncio.sleep(1)
-		self.status = "saved"
-
 
 
 	def check_end(self):
@@ -112,11 +109,11 @@ class PongGameManager:
 	async def finish_game(self):
 		status = "finished"
 		if self.status == "disconnected":
+			self.scores[0] = 0
+			self.scores[1] = 0
 			if self.players_connection["player1"] == "on":
 				self.scores[0] = self.win_condition
-				self.scores[1] = 0
 			elif self.players_connection["player2"] == "on":
-				self.scores[0] = 0
 				self.scores[1] = self.win_condition
 			status = self.status
 		else:
@@ -163,7 +160,8 @@ class RPSGameManager:
 		if length == 2:
 			await self.calculate_result()
 			await self.change_status("saving")
-			# await self.finish_game()
+			print("saving and call finish_game()")
+			await self.finish_game()
 
 	async def get_status(self):
 		async with asyncio.Lock():
@@ -201,6 +199,7 @@ class RPSGameManager:
 
 
 	async def finish_game(self):
+		print("finishi_game() start")
 		player1 = await sync_to_async(Users.objects.get)(intra_id=self.intra_id["player1"])
 		player2 = await sync_to_async(Users.objects.get)(intra_id=self.intra_id["player2"])
 
@@ -229,3 +228,4 @@ class RPSGameManager:
 		await sync_to_async(player2.save)()
 		await sync_to_async(game.save)()
 		await self.change_status("saved")
+		print("finishi_game() done")
