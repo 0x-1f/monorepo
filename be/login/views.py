@@ -119,13 +119,13 @@ class IntraAuthViewSet(viewsets.ModelViewSet):
         else:
             return JsonResponse({'message': 'Token is valid'}, status=status.HTTP_200_OK)
 
-    @action(datail=False, methods=["get"], url_path="get_intra_id")
+    @action(detail=False, methods=["get"], url_path="get_intra_id")
     def get_intra_id(self, request):
         jwt_token = request.COOKIES.get('jwt')
         if not jwt_token:
             return JsonResponse({'error': 'JWT token not found'}, status=status.HTTP_404_NOT_FOUND)
         payload = jwt.decode(jwt_token, settings.JWT_SECRET_KEY, algorithms=['HS256'])
-        user = User.objects.get(email=payload.get('user_email'))
+        user = Users.objects.get(email=payload.get('user_email'))
         if not user:
             return JsonResponse({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
         else:
