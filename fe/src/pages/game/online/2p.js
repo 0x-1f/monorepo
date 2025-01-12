@@ -32,6 +32,18 @@ function gameRoom(app, match_url, me) {
 		drawGameState(gameState);
 	}
 
+    wss.onclose = function(e) {
+        app.innerHTML = `
+        <h1>Game Over</h1>
+        <h2>${gameState.left_score > gameState.right_score ? leftUser : rightUser} wins!</h2>
+        <button id="back">Back</button>
+        `
+
+        document.getElementById('back').addEventListener('click', () => {
+            window.location.href = '/main';
+        });
+    }
+
 	function drawGameState(gameState) {
 		if (!gameState) return;
 		const canvas = document.getElementById('pongCanvas');
