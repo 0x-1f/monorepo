@@ -83,6 +83,12 @@ function gameRoom(app, match_url, me) {
           wss.send(JSON.stringify({ "move" : "down" }));
         }
     });
+
+    window.onpopstate = function (event) {
+        if (wss && wss.readyState === WebSocket.OPEN) {
+            wss.close();
+        }
+    };
 }
 
 export function render(app, navigate) {
