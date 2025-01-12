@@ -16,7 +16,7 @@ class PongGame(models.Model):
         return f"Game {self.pong_id} ({self.status})"
 
 class RPSGame(models.Model):
-    pong_id = models.AutoField(primary_key=True)
+    rps_id = models.AutoField(primary_key=True)
     created_date = models.DateTimeField(default=now)
     status = models.CharField(max_length=255, default="")
     result = models.CharField(max_length=255, default="")
@@ -26,4 +26,4 @@ class RPSGame(models.Model):
     player2_choice = models.CharField(max_length=255, default="")
 
     def __str__(self):
-        return f"Game {self.pong_id} ({self.status})"
+        return f"Game {self.rps_id} ({self.status})"
