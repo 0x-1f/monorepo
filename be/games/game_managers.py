@@ -163,7 +163,11 @@ class RPSGameManager:
 		if length == 2:
 			await self.calculate_result()
 			await self.change_status("saving")
-			await self.finish_game()
+			# await self.finish_game()
+
+	async def get_status(self):
+		async with asyncio.Lock():
+			return self.status
 
 	async def get_data(self):
 		async with asyncio.Lock():
@@ -224,4 +228,4 @@ class RPSGameManager:
 		await sync_to_async(player1.save)()
 		await sync_to_async(player2.save)()
 		await sync_to_async(game.save)()
-		self.change_status("saved")
+		await self.change_status("saved")
