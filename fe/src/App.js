@@ -87,9 +87,9 @@ async function renderPage(path) {
 
 // Handle popstate for back/forward navigation
 window.addEventListener('popstate', (event) => {
-    renderPage(event.state ? event.state.path : 'login');
+    renderPage(event.state ? event.state.path : 'main');
 });
 
 // Initial page load
-const initialPath = window.location.pathname.replace('/', '') || 'login';
+const initialPath = window.location.pathname.replace('/', '') || 'main';
 renderPage(initialPath);
