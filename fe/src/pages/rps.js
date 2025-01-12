@@ -265,7 +265,7 @@ function renderResultPage(app, navigate, result, opponentChoice, opponentId) {
 
 function startMatching(app, navigate) {
     renderMatchingPage(app);
-    wss = new WebSocket(`wss://localhost/ws/rps/join/${intraId}`);
+    wss = new WebSocket(`wss://${window.location.hostname}/ws/rps/join/${intraId}`);
     wss.onopen = () => console.log("[Matching WSS] Connected");
     wss.onmessage = (event) => {
         const data = JSON.parse(event.data);
@@ -283,7 +283,7 @@ function connectMatchWebSocket(app, navigate, matchUrl) {
     const splitted = matchUrl.split("/");
     const matchName = splitted[splitted.length - 2];
     
-    matchWss = new WebSocket(`wss://localhost${matchUrl}${intraId}`);
+    matchWss = new WebSocket(`wss://${window.location.hostname}${matchUrl}${intraId}`);
     matchWss.onmessage = (event) => {
         const data = JSON.parse(event.data);
         if (data.status === "start") {

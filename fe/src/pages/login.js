@@ -6,7 +6,7 @@ export function render(app, navigate) {
         <button class="button btn-primary" id="loginButton">Login with 42</button>
     `;
     document.getElementById('loginButton').addEventListener('click', () => {
-        window.location.href = 'http://localhost/api/auth/login';
+        window.location.href = `https://${window.location.hostname}/api/auth/login`;
     });
 
     if (fetch('/api/auth/check_expired', {

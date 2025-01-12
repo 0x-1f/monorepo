@@ -21,7 +21,7 @@ function gameRoom(app, match_url, me) {
     </div>
     `;
 
-    const wss = new WebSocket(`wss://localhost${match_url}${me}`);
+    const wss = new WebSocket(`wss://${window.location.hostname}${match_url}${me}`);
 
     wss.onopen = function(e) {
 		console.log('WS Opened');
@@ -98,7 +98,7 @@ export function render(app, navigate) {
     let intraId; // To store the fetched intra ID
 
     // Fetch intra ID from the API
-    fetch('https://localhost/api/auth/get_intra_id/', {
+    fetch(`https://${window.location.hostname}/api/auth/get_intra_id/`, {
         credentials: 'include',
     })
         .then(response => {
@@ -111,8 +111,7 @@ export function render(app, navigate) {
             intraId = data.intra_id;
 
             // Dynamically determine the WebSocket protocol based on the current protocol
-            const wsProtocol = location.protocol === 'https:' ? 'wss' : 'ws';
-            wss = new WebSocket(`${wsProtocol}://localhost/ws/pong/join/${intraId}`);
+            wss = new WebSocket(`wss://${window.location.hostname}/ws/pong/join/${intraId}`);
 
             // WebSocket event listeners
             wss.onopen = function (e) {
