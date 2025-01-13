@@ -77,7 +77,7 @@ function gameRoom(app, match_url, me) {
         const [leftUser, rightUser] = lastPart.split('_');
 
 		ctx.fillStyle = 'white';
-		ctx.font = '20px Arial';
+		ctx.font = '20px DOSGothic';
 		ctx.fillText(leftUser, 20, 30);
 		ctx.fillText(rightUser, canvas.width - 120, 30);
 

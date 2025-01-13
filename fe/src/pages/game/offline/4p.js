@@ -131,7 +131,7 @@ function startGame(app, navigate) {
     // 현재 게임 라운드의 출전 선수 이름을 캔버스 상단 좌우에 표시
     const [leftPlayerName, rightPlayerName] = getPlayersForCurrentGame();
     ctx.fillStyle = '#FFF';
-    ctx.font = '20px Arial';
+    ctx.font = '20px DOSGothic';
     ctx.fillText(leftPlayerName, 10, 20);
     const rightTextWidth = ctx.measureText(rightPlayerName).width;
     ctx.fillText(rightPlayerName, canvas.width - rightTextWidth - 10, 20);
