@@ -1,4 +1,5 @@
 import { t } from '/src/modules/locale/localeManager.js';
+import raccoon from '/assets/raccoon.gif';
 
 export function render(app, navigate) {
     app.innerHTML = `
@@ -25,8 +26,14 @@ export function render(app, navigate) {
         'b', 'a'
       ];
 
-      let userInput = [];
-      const maxLength = konamiCode.length;
+      const ourFriendlyRaccoon = [
+        'c', 'c', 'h', 'i', 'c', 'o', 't', 'e'
+      ];
+
+      let konamiInput = [];
+      let raccoonInput = [];
+      const maxKonamiLength = konamiCode.length;
+      const maxRaccoonLength = ourFriendlyRaccoon.length;
 
       // Function to trigger the Konami code effect
       function activateKonamiMode() {
@@ -46,18 +53,46 @@ export function render(app, navigate) {
         }, 5000);
       }
 
+      function activateRaccoonMode() {
+        console.log("Raccoon Code Activ");
+        const raccoonImg = document.createElement('img');
+        raccoonImg.src = raccoon;
+        raccoonImg.style.position = 'fixed';
+        raccoonImg.style.bottom = '0';
+        raccoonImg.style.right = '0';
+        raccoonImg.style.zIndex = '999999';
+        raccoonImg.style.width = '200px';
+        raccoonImg.style.height = '200px';
+        document.body.appendChild(raccoonImg);
+        setTimeout(() => {
+          raccoonImg.remove();
+        }, 5000);
+      }
+
       // Listen for keydown events
       document.addEventListener('keydown', (event) => {
-        userInput.push(event.key);
-      
-        // Keep the userInput array length within the max length
-        if (userInput.length > maxLength) {
-          userInput.shift();
+        // Add to Konami input buffer
+        konamiInput.push(event.key);
+        if (konamiInput.length > maxKonamiLength) {
+          konamiInput.shift(); // Remove the oldest input if it exceeds the max length
         }
-
-        if (userInput.join('') === konamiCode.join('')) {
+      
+        // Add to Raccoon input buffer
+        raccoonInput.push(event.key);
+        if (raccoonInput.length > maxRaccoonLength) {
+          raccoonInput.shift(); // Remove the oldest input if it exceeds the max length
+        }
+      
+        // Check for Konami Code
+        if (konamiInput.join('') === konamiCode.join('')) {
           activateKonamiMode();
-          userInput = []; // Reset the input array
+          konamiInput = []; // Reset Konami input
+        }
+      
+        // Check for Raccoon Code
+        if (raccoonInput.join('') === ourFriendlyRaccoon.join('')) {
+          activateRaccoonMode();
+          raccoonInput = []; // Reset Raccoon input
         }
       });
 }
