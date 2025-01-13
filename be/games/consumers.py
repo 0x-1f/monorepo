@@ -1,134 +1,111 @@
 import json
 import asyncio
 from channels.generic.websocket import AsyncWebsocketConsumer
-# from django.contrib.auth.models import AnonymousUser
 import random
 
 from .game_managers import PongGameManager, RPSGameManager
-# from .models import PongGame
-# from user.models import Users
 
-fps = 60
-time_limit = 10
+fps = 60 # 1초당 refresh 횟수
+time_limit = 10 # 상대방이 안들어올때 network error 로 넘기는 시간 기준 (초)
 
+# pong game 을 위한 대기 큐, 상호 확인, 게임 방 딕셔너리 그리고 lock
 pong_queue = []
-pong_matching = 0
+pong_cross_check = 0
 pong_game_rooms = {}
-
 pong_queue_lock = asyncio.Lock()
-pong_matching_lock = asyncio.Lock()
+pong_cross_lock = asyncio.Lock()
 
+# 가위바위보 을 위한 대기 큐, 상호 확인, 게임 방 딕셔너리 그리고 lock
 rps_queue = []
-rps_matching = 0
+rps_cross_check = 0
 rps_game_rooms = {}
-
 rps_queue_lock = asyncio.Lock()
-rps_matching_lock = asyncio.Lock()
+rps_cross_check_lock = asyncio.Lock()
 
+# pong 1:1 대기 class - 대기 큐에 등록후 매칭에 성공되면 웹소켓 url 응답
 class PongQueueConsumer(AsyncWebsocketConsumer):
 	async def connect(self):
 		global pong_queue
-		# self.user = self.scope['user']  # 사용자 객체를 가져옴 (클라이언트쪽에 oauth 인증된 세션쿠키가 있다면 users객체를 받아올수 있음)
 		self.intra_id = self.scope['url_route']['kwargs']['intra_id']
 
-		# if isinstance(user, AnonymousUser) or not user.is_authenticated:
-        #     await self.close()  # 인증되지 않은 사용자의 연결을 거부
-		# else:
-
-		async with pong_queue_lock:  # lock 걸고 큐에 사용자 추가
-			if self.intra_id in pong_queue:
+		async with pong_queue_lock:  # lock 걸고 큐 확인
+			if self.intra_id in pong_queue: # 동일 intra id 로 웹소켓 연결 거절
+				self.status = "denied" # 거절 상태 저장
 				await self.close()
 				return
 			else:
-				await self.accept()  # 인증된 사용자의 경우, 웹소켓 연결 수락
+				await self.accept()  # 웹소켓 연결 수락 후 대기 큐에 등록
 				pong_queue.append(self.intra_id)
+				self.status = "waiting"  # 상태 기다림으로 저장
+				print("Pong 대기큐")
+				print(pong_queue)
 
-		self.status = "waiting"
 		self.user1_intra_id = "none"
 		self.user2_intra_id = "none"
 		self.running_task = asyncio.create_task(self.wait_for_match())
 
-
 	async def disconnect(self, close_code):
-		global pong_matching
+		global pong_cross_check
 		global pong_queue
+		if self.status == "denied": # 동일 intra id 로 웹소켓 연결 거절 후 종료
+			return
 		self.running_task.cancel()
-		print(f"{self.intra_id} is disconnecting...")
-		if self.status == "waiting":
-			print("status is waiting...")
+		if self.status == "waiting":  # 대기중 매치가 성사되지 않은 상태에서 퇴장(연결종료). 대기큐에서 제거
 			async with pong_queue_lock:
 				if self.intra_id in pong_queue:
 					pong_queue.remove(self.intra_id)
-					print(f"{self.intra_id} removed itself")
-		elif self.intra_id == self.user1_intra_id:  # user1 인지 확인 (대기열에서 삭제는 한쪽에서만 진행)
-			print(f"{self.intra_id} == {self.user1_intra_id}")
+		elif self.intra_id == self.user1_intra_id:  # user1 인지 확인 (대기열에서 삭제는 user1 에서만 진행)
 			while True:
-				async with pong_matching_lock:  # 매칭에 lock 걸고 서로의 아이디를 확인했는지 확인
-					if pong_matching == 2:
-						print(f"pong_matchin is {pong_matching}")
+				async with pong_cross_lock:  # 매칭에 lock 걸고 서로의 아이디를 확인했는지 확인
+					if pong_cross_check == 2:
 						async with pong_queue_lock:  # 서로 확인했다면 lock 걸고 대기큐에서 삭제 (양쪽 모두)
 							if self.user1_intra_id in pong_queue:
-								print(f"{self.user1_intra_id} is in the queue")
 								pong_queue.remove(self.user1_intra_id)
-								print(f"{self.user1_intra_id} is removed")
 							if self.user2_intra_id in pong_queue:
-								print(f"{self.user2_intra_id} is in the queue")
 								pong_queue.remove(self.user2_intra_id)
-								print(f"{self.user2_intra_id} is removed")
-							print(f"{self.intra_id} removed both")
-						pong_matching = 0 # 다음 매칭을 위해 초기화
+						pong_cross_check = 0 # 다음 매칭을 위해 초기화
 						break
-					elif pong_matching == 0:
-						print("pong_matching is 0")
+					elif pong_cross_check == 0:
 						break
-				asyncio.sleep(1) # 1초후 재확인
-		print(f"{self.intra_id} is disconnected")
+				asyncio.sleep(1/20) # 1/20초 후 재확인
 
 	async def wait_for_match(self):
 		global pong_queue
-		global pong_matching  # 전역 변수 선언
-		while True:   # 매칭 대기 루프: queue의 길이가 2 이상이면서, 나의 index가 0 or 1 이면 매칭가능
+		global pong_cross_check
+		while True:  # 매칭 대기 루프
 			async with pong_queue_lock:
 				index = pong_queue.index(self.intra_id)
 				length = len(pong_queue)
-				print(f"{self.intra_id}'s index is {index} and length is {length}")
-				if length > 1 and (index == 0 or index == 1):
-					print(f"{self.intra_id}'s matching process on")
-					self.status = "matched"
+			if length > 1 and (index == 0 or index == 1): # 게임 매칭 조건: queue의 길이가 2 이상이면서, 나의 index가 0 or 1 이면 매칭가능
+				async with pong_queue_lock:
 					self.user1_intra_id = pong_queue[0]
 					self.user2_intra_id = pong_queue[1]
-
-					async with pong_matching_lock:  # lock 걸고 매칭 카운트 올리기 (상대방 아이디를 확인했다는 표시)
-						pong_matching += 1
-					await self.send(json.dumps({"match_url": f"/ws/pong/match/{self.user1_intra_id}_{self.user2_intra_id}/"})) # intra_id 조합하여 새 웹소켓 URL 생성 및 보내기
-					print(f"match_url sent to {self.intra_id}")
-					await self.close()
-			await asyncio.sleep(1)  # 1초 대기 후 재확인
+				async with pong_cross_lock:  # lock 걸고 cross check +1 (상대방 아이디를 확인했다는 표시)
+					pong_cross_check += 1
+				await self.send(json.dumps({"match_url": f"/ws/pong/match/{self.user1_intra_id}_{self.user2_intra_id}/"})) # intra_id 조합하여 새 웹소켓 URL 생성 및 보내기
+				self.status = "matched"
+				await self.close()
+			await asyncio.sleep(1/20)  # 1/20초 후 재확인
 
 
 class PongMatchConsumer(AsyncWebsocketConsumer):
 	async def connect(self):
 		global pong_game_rooms
-		# self.user = self.scope['user'] # 사용자 ID를 가져옴 (클라이언트쪽에 oauth 인증된 세션쿠키가 있다면 users객체를 받아올수 있음)
 		self.match_name = self.scope['url_route']['kwargs']['match_name']  # URL에서 게임방 이름 가져오기
-		self.intra_id = self.scope['url_route']['kwargs']['intra_id']
+		self.intra_id = self.scope['url_route']['kwargs']['intra_id']  # URL에서 intra id 가져오기
 
-		# if isinstance(user, AnonymousUser) or not user.is_authenticated:
-        #     await self.close()  # 인증되지 않은 사용자의 연결을 거부
-		# else:
+		await self.accept()  # 웹소켓 연결 수락
 
-		await self.accept()  # 인증된 사용자의 경우, 웹소켓 연결 수락
-		print(f"{self.intra_id} is ready")
+		if self.match_name not in pong_game_rooms: # 아직 생성되지 않았다면 게임매니저 객체 생성 및 게임 방에 등록
+			pong_game_rooms[self.match_name] = PongGameManager()
 
-		if self.match_name not in pong_game_rooms:
-			pong_game_rooms[self.match_name] = PongGameManager() # 아직 생성되지 않았다면 게임방 등록 및 게임매니저 객체 생성
+		player1, player2 = self.match_name.split('_')  # 방 이름으로부터 역할 지정
+		if self.intra_id == player1:
+			self.role = "player1"
+		elif self.intra_id == player2:
+			self.role = "player2"
 
-		player1, player2 = self.match_name.split('_')  # 방 이름으로부터 역할에 따른 아이디 저장
-		async with asyncio.Lock():  # lock 걸고 내 역할을 지정 및 내 상태를 off->on 으로 활성화
-			if self.intra_id == player1:
-				self.role = "player1"
-			elif self.intra_id == player2:
-				self.role = "player2"
+		async with asyncio.Lock():  # lock 걸고 내 상태를 off->on 으로 활성화
 			pong_game_rooms[self.match_name].players_connection[self.role] = "on"
 			pong_game_rooms[self.match_name].players_intra[self.role] = self.intra_id
 
@@ -136,8 +113,8 @@ class PongMatchConsumer(AsyncWebsocketConsumer):
 			if pong_game_rooms[self.match_name].players_connection["player1"] == "on" and pong_game_rooms[self.match_name].players_connection["player2"] == "on":
 				pong_game_rooms[self.match_name].start_game_loop()
 
-		self.timer = 0.0
-		self.running_task = asyncio.create_task(self.send_position())
+		self.timer = 0.0 # 타이머 초기화
+		self.running_task = asyncio.create_task(self.send_position()) # 메인 함수인 send_position() 함수 시작
 
 
 	async def disconnect(self, close_code):
@@ -152,36 +129,31 @@ class PongMatchConsumer(AsyncWebsocketConsumer):
 				if pong_game_rooms[self.match_name].players_connection["player1"] == "off" and pong_game_rooms[self.match_name].players_connection["player2"] == "off":
 					del pong_game_rooms[self.match_name]
 
-
-	async def receive(self, text_data):
+	async def receive(self, text_data): # player의 패들이동 입력받기 { "move": "up"/"down" }
 		data = json.loads(text_data)
 		if "move" in data:
 			pong_game_rooms[self.match_name].move_paddle(self.role, data["move"])
 
-	async def send_position(self):
+	async def send_position(self): # 메인 함수 status(waiting > playing > saving > saved) 에 따라서 게임 진행
 		global pong_game_rooms
 		global time_limit
-		while pong_game_rooms[self.match_name].status == "waiting" and self.timer < time_limit:
-			print(f"waiting for player...for {self.timer}")
+		while pong_game_rooms[self.match_name].status == "waiting" and self.timer < time_limit: # 시간 제한동안 매칭된 상대 입장을 기다림
 			await asyncio.sleep(1/fps)
 			self.timer += 1/fps
-		if time_limit <= self.timer:
+		if time_limit <= self.timer: # 만약 시간제한동안 매칭된 상대가 들어오지 않는다면 network_error 로 판단
 			pong_game_rooms[self.match_name].change_status("network_error")
 			await self.send(text_data=json.dumps(
 				pong_game_rooms[self.match_name].get_state()
 			))
 			await self.close()
-		while pong_game_rooms[self.match_name].status == "playing":
-			await asyncio.sleep(1/fps)
-			# print("playing")
-			# print(pong_game_rooms[self.match_name].status)
+		while pong_game_rooms[self.match_name].status == "playing": # 게임이 진행되는 동안 게임좌표를 player에게 보내기
 			await self.send(text_data=json.dumps(
 				pong_game_rooms[self.match_name].get_state()
 			))
-		while pong_game_rooms[self.match_name].status != "saved":
-			# print("saving the result...")
+			await asyncio.sleep(1/fps)
+		while pong_game_rooms[self.match_name].status != "saved": # 게임을 저장하는동안 기다림
 			await asyncio.sleep(1)
-		await self.send(text_data=json.dumps(
+		await self.send(text_data=json.dumps(  # 마지막 결과 보내주기
 				pong_game_rooms[self.match_name].get_state()
 		))
 		await self.close()
@@ -190,68 +162,63 @@ class PongMatchConsumer(AsyncWebsocketConsumer):
 class RPSQueueConsumer(AsyncWebsocketConsumer):
 	async def connect(self):
 		global rps_queue
-		# self.user = self.scope['user']  # 사용자 객체를 가져옴 (클라이언트쪽에 oauth 인증된 세션쿠키가 있다면 users객체를 받아올수 있음)
 		self.intra_id = self.scope['url_route']['kwargs']['intra_id']
 
-		# if isinstance(user, AnonymousUser) or not user.is_authenticated:
-        #     await self.close()  # 인증되지 않은 사용자의 연결을 거부
-		# else:
-		async with rps_queue_lock:  # lock 걸고 큐에 사용자 추가
-			if self.intra_id in rps_queue:
+		async with rps_queue_lock:
+			if self.intra_id in rps_queue: # 중복된 사용자 요청은 거절
+				self.status = "denied" # 거절상태 저장
 				self.close()
 				return
 			else:
-				await self.accept()  # 인증된 사용자의 경우, 웹소켓 연결 수락
+				await self.accept()  # 웹소켓 연결 수락 및 대기큐 등록
 				rps_queue.append(self.intra_id)
-		self.status = "waiting"
+				self.status = "waiting" # 대기중 상태로 저장
+				print("Pong 대기큐")
+				print(pong_queue)
+
 		self.user1_intra_id = "none"
 		self.user2_intra_id = "none"
-		# await self.wait_for_match() # 매칭 대기
 		self.running_task = asyncio.create_task(self.wait_for_match())
 
 	async def disconnect(self, close_code):
-		global rps_matching
+		global rps_cross_check
 		global rps_queue
-		self.running_task.cancel()
-		print(f"{self.intra_id} disconnect(), status: {self.status}")
-		if self.status == "waiting":
+		if self.status == "denied": # 거절된 요청은 바로 종료
+			return
+		self.running_task.cancel()  # 메인 함수 (비동기) 종료
+		if self.status == "waiting":  # 매칭이 안된 상태에서 종료
 			async with rps_queue_lock:
 				if self.intra_id in rps_queue:
-					rps_queue.remove(self.intra_id)
-					print("waiting canceled")
+					rps_queue.remove(self.intra_id)  # 매칭이 안되고 대기열에서 삭제 후 종료
 		elif self.intra_id == self.user1_intra_id:  # user1 인지 확인 (대기열에서 삭제는 한쪽에서만 진행)
 			while True:
-				async with rps_matching_lock:  # 매칭에 lock 걸고 서로의 아이디를 확인했는지 확인
-					if rps_matching == 2:
+				async with rps_cross_check_lock:  # 매칭에 lock 걸고 서로의 아이디를 확인했는지 확인
+					if rps_cross_check == 2:
 						async with rps_queue_lock:  # 서로 확인했다면 lock 걸고 대기큐에서 삭제 (양쪽 모두)
 							if self.user1_intra_id in rps_queue:
 								rps_queue.remove(self.user1_intra_id)
 							if self.user2_intra_id in rps_queue:
 								rps_queue.remove(self.user2_intra_id)
-						rps_matching = 0 # 다음 매칭을 위해 초기화
+						rps_cross_check = 0 # 다음 매칭을 위해 초기화
 						break
 				asyncio.sleep(1) # 1초후 재확인
 
 	async def wait_for_match(self):
 		global rps_queue
-		global rps_matching  # 전역 변수 선언
+		global rps_cross_check  # 전역 변수 선언
 		while True:   # 매칭 대기 루프: queue의 길이가 2 이상이면서, 나의 index가 0 or 1 이면 매칭가능
-			print("waiting loop")
 			async with rps_queue_lock:
 				index = rps_queue.index(self.intra_id)
 				length = len(rps_queue)
-			print(f"length of queue{length}")
 			if length > 1 and (index == 0 or index == 1):
 				self.status = "matched"
 				async with rps_queue_lock:     # lock 걸고 매칭된 intra_id 가져오기
 					self.user1_intra_id = rps_queue[0]
 					self.user2_intra_id = rps_queue[1]
 
-				async with rps_matching_lock:  # lock 걸고 매칭 카운트 올리기 (상대방 아이디를 확인했다는 표시)
-					rps_matching += 1
-					print(f"rps_matching: {rps_matching}")
+				async with rps_cross_check_lock:  # lock 걸고 크로스 체크 +1
+					rps_cross_check += 1
 				await self.send(json.dumps({"match_url": f"/ws/rps/match/{self.user1_intra_id}_{self.user2_intra_id}/"})) # intra_id 조합하여 새 웹소켓 URL 생성 및 보내기
-				print(f"sent match_url to {self.intra_id}")
 				await self.close()
 			await asyncio.sleep(1)  # 1초 대기 후 재확인
 
@@ -259,14 +226,10 @@ class RPSQueueConsumer(AsyncWebsocketConsumer):
 class RPSMatchConsumer(AsyncWebsocketConsumer):
 	async def connect(self):
 		global rps_game_rooms
-		# self.user = self.scope['user'] # 사용자 ID를 가져옴 (클라이언트쪽에 oauth 인증된 세션쿠키가 있다면 users객체를 받아올수 있음)
 		self.match_name = self.scope['url_route']['kwargs']['match_name']  # URL에서 게임방 이름 가져오기
 		self.intra_id = self.scope['url_route']['kwargs']['intra_id']
 
-		# if isinstance(user, AnonymousUser) or not user.is_authenticated:
-        #     await self.close()  # 인증되지 않은 사용자의 연결을 거부
-		# else:
-		await self.accept()  # 인증된 사용자의 경우, 웹소켓 연결 수락
+		await self.accept()  # 웹소켓 연결 수락
 
 		if self.match_name not in rps_game_rooms:
 			rps_game_rooms[self.match_name] = RPSGameManager() # 아직 생성되지 않았다면 게임방 등록 및 게임매니저 객체 생성
@@ -290,19 +253,18 @@ class RPSMatchConsumer(AsyncWebsocketConsumer):
 		self.timer = 0.0
 		self.running_task = asyncio.create_task(self.send_status())
 
-
 	async def disconnect(self, close_code):
 		global rps_game_rooms
-		self.running_task.cancel()
-		async with asyncio.Lock():
+		self.running_task.cancel() # 메인 함수 (비동기) 종료
+		async with asyncio.Lock(): # if 선택을 안한 상황에서 종료시 자동으로 선택
 			if self.role not in rps_game_rooms[self.match_name].choice:
 				await rps_game_rooms[self.match_name].save_choice(self.role, await self.random_RPS())
 
-		async with asyncio.Lock():
+		async with asyncio.Lock():  # 나갈때 나의 상태 off 변경
 			if self.match_name in rps_game_rooms and rps_game_rooms[self.match_name].connection[self.role] == "on":
 				rps_game_rooms[self.match_name].connection[self.role] = "off"
 
-		async with asyncio.Lock():
+		async with asyncio.Lock():  # 두번째 off 하는 사람이 매니저 객체 삭제
 			if len(rps_game_rooms[self.match_name].connection) == 2:
 				if rps_game_rooms[self.match_name].connection["player1"] == "off" and rps_game_rooms[self.match_name].connection["player2"] == "off":
 					del rps_game_rooms[self.match_name]
@@ -310,47 +272,35 @@ class RPSMatchConsumer(AsyncWebsocketConsumer):
 				del rps_game_rooms[self.match_name]
 
 
-	async def receive(self, text_data):
+	async def receive(self, text_data): # player의 선택 전달받기
 		global rps_game_rooms
 		data = json.loads(text_data)
 		if "choice" in data:
-			print("sending the choice...")
 			await rps_game_rooms[self.match_name].save_choice(self.role, data["choice"])
-			print("sent the choice...")
 
-
-	async def send_status(self):
+	async def send_status(self): # 클라이언트에게 상황 전달
 		global rps_game_rooms
 		global time_limit
-		while await rps_game_rooms[self.match_name].get_status() == "waiting" and self.timer < time_limit:
+		while await rps_game_rooms[self.match_name].get_status() == "waiting" and self.timer < time_limit: # 제한 시간동안 상대방이 들어오기까지 대기
 			await asyncio.sleep(1/fps)
 			self.timer += 1/fps
-			print(f"{self.intra_id} is waiting ... for {self.timer}")
-		if time_limit <= self.timer:
+		if time_limit <= self.timer: # 시간제한이 지나도록 상대가 들어오지 않으면 network_error로 간주
 			await rps_game_rooms[self.match_name].change_status("network_error")
 			await self.close()
 		else:
-			# 시작신호 주고 10(?!)초 기다리기 (프론트에서 카운트 다운)//
-			await self.send(text_data=json.dumps(
+			await self.send(text_data=json.dumps( # 시작신호 주고 10(?!)초 기다리기 (프론트에서 카운트 다운)//
 				{"status": "start"}
 			))
 			asyncio.sleep(10)
 
-		# 두 플레이어 모두 선택을 제출했는지 확인
-		while await rps_game_rooms[self.match_name].get_status() == "playing":
+		while await rps_game_rooms[self.match_name].get_status() == "playing": # 두 플레이어 모두 선택이 전달될때까지 대기
 			await asyncio.sleep(1)
-			print(f"{self.intra_id} is playing....")
 
-		# 저장하는동안 대기
-		# await rps_game_rooms[self.match_name].finish_game()
-
-		while await rps_game_rooms[self.match_name].get_status() == "saving":
+		while await rps_game_rooms[self.match_name].get_status() == "saving": # 결과를 저장할동안 대기
 			await asyncio.sleep(1)
-			print(f"{self.intra_id} is saving...")
 
-		# 저장완료후 결과 보내기
-		data = await rps_game_rooms[self.match_name].get_data()
-		await self.send(text_data=json.dumps(
+		data = await rps_game_rooms[self.match_name].get_data() # 게임 내용 가져오기
+		await self.send(text_data=json.dumps(  # 게임 결과 전달하기
 			{
 				"status": "finished",
 				"result": data["result"][self.role],
@@ -359,9 +309,7 @@ class RPSMatchConsumer(AsyncWebsocketConsumer):
 		))
 		await self.close()
 
-
-
-	async def random_RPS(self):
+	async def random_RPS(self): # 선택을 하지 않았을 경우 랜덤으로 정해주기
 		num = random.randint(0, 2)
 		if num == 0:
 			return "rock"
