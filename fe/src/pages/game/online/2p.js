@@ -51,6 +51,14 @@ function gameRoom(app, match_url, me) {
             document.getElementById('back').addEventListener('click', () => {
                 window.location.href = '/main';
             });
+        } else if (gameState.status == 'network_error') {
+            app.innerHTML = `
+            <h1>${t('LAN', 'Opponent mad at you.')}</h1>
+            <button id="back">Back</button>
+            `;
+            document.getElementById('back').addEventListener('click', () => {
+                window.location.href = '/main';
+            });
         }
 		drawGameState(gameState);
 	}
