@@ -27,7 +27,7 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-nj3$2v!(az_p@-homi%v8
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -169,6 +169,6 @@ EMAIL_PORT = config('SMTP_PORT', default="")
 EMAIL_HOST_USER = config('SMTP_ID', default="")
 EMAIL_HOST_PASSWORD = config('SMTP_PW', default="")
 EMAIL_USE_TLS = True
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+DEFAULT_FROM_EMAIL = 'trustme.iamnotvirus@gmail.com'
 
 JWT_SECRET_KEY = config('JWT_SECRET_KEY', default="")

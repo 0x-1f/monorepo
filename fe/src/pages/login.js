@@ -9,7 +9,7 @@ export function render(app, navigate) {
         window.location.href = `https://${window.location.hostname}/api/auth/login`;
     });
 
-    if (fetch('/api/auth/check_expired', {
+    if (getCookie('jwt') && fetch('/api/auth/check_expired', {
         credentials: 'include',
     }).then(response => {
         if (response.status === 400) {

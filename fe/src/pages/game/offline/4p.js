@@ -52,6 +52,14 @@ export function render(app, navigate) {
   const startBtn = document.getElementById('start-tournament-btn');
   startBtn.addEventListener('click', () => {
     /* 입력된 이름이 없으면 기본값을 사용 */
+    const blockedChars = /[^a-zA-Z0-9]/g;
+    if (blockedChars.test(document.getElementById('player1-input').value) ||
+        blockedChars.test(document.getElementById('player2-input').value) ||
+        blockedChars.test(document.getElementById('player3-input').value) ||
+        blockedChars.test(document.getElementById('player4-input').value)) {
+      alert(t('invalid-name', 'Invalid player name'));
+      return;
+    }
     const p1 = (document.getElementById('player1-input')?.value || "").trim();
     const p2 = (document.getElementById('player2-input')?.value || "").trim();
     const p3 = (document.getElementById('player3-input')?.value || "").trim();
