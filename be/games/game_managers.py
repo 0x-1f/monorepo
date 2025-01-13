@@ -30,7 +30,7 @@ class PongGameManager:
 		self.ballRadius = 10
 		self.ball_speed = {"x": 5, "y": 5}
 
-		self.win_condition = 10
+		self.win_condition = 7
 		self.status = "waiting"
 		self.connection = ""
 
