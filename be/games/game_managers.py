@@ -94,7 +94,6 @@ class PongGameManager:
 	async def change_status(self, new_status): # 밖에서 status 바꾸기 요청하기 위한 함수
 		async with asyncio.Lock():
 			self.status = new_status
-		# print("status changed")
 
 	def move_paddle(self, player, direction):  # player의 패들 이동 계산
 		if direction == "up":

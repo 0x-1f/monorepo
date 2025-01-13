@@ -73,7 +73,6 @@ class RPSSerializerHistory(serializers.ModelSerializer):
 
     def get_result(self, obj):
         intra_id = self.get_intra_id()
-        print(f"intra_id in result {intra_id}, obj result : {obj.result}", flush=True)
         if obj.result == "player1 draw, player2 draw":
             return "Draw"
         if obj.player1.intra_id == intra_id and obj.result == "player1 win, player2 lose":

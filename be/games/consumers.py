@@ -138,11 +138,9 @@ class PongMatchConsumer(AsyncWebsocketConsumer):
 		global pong_game_rooms
 		global time_limit
 		while pong_game_rooms[self.match_name].status == "waiting" and self.timer < time_limit: # 시간 제한동안 매칭된 상대 입장을 기다림
-			print("waiting")
 			await asyncio.sleep(1/fps)
 			self.timer += 1/fps
 		if time_limit <= self.timer: # 만약 시간제한동안 매칭된 상대가 들어오지 않는다면 network_error 로 판단
-			print("network_error")
 			await pong_game_rooms[self.match_name].change_status("network_error")
 			await self.send(text_data=json.dumps(
 				pong_game_rooms[self.match_name].get_state()
@@ -176,8 +174,8 @@ class RPSQueueConsumer(AsyncWebsocketConsumer):
 				await self.accept()  # 웹소켓 연결 수락 및 대기큐 등록
 				rps_queue.append(self.intra_id)
 				self.status = "waiting" # 대기중 상태로 저장
-				print("Pong 대기큐")
-				print(pong_queue)
+				print("RPS 대기큐")
+				print(rps_queue)
 
 		self.user1_intra_id = "none"
 		self.user2_intra_id = "none"
