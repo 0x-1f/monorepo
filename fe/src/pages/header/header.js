@@ -24,6 +24,10 @@ export function renderHeader(header, navigate) {
             return response.json();
         }
     }).then(data => {
+        const divElement = document.querySelector('.uid');
+        if (divElement && divElement.querySelector('p')) {
+            return;
+        }
         const intraId = data.intra_id;
         const uidElement = document.createElement('p');
         uidElement.textContent = intraId;
