@@ -4,18 +4,21 @@ import { getCookie, removeCookie } from "../../modules/cookie/cookieManager";
 export function renderHeader(header, navigate) {
 
     const jwt = getCookie('jwt');
-    if (!jwt) {
+    const tmp_jwt = getCookie('tmp_jwt');
+    if ((!jwt || !tmp_jwt) && (window.location.pathname !== '/login' && window.location.pathname !== '/2fa')) {
         navigate('login');
+        window.location.reload();
+        return;
     }
 
-    if (fetch('/api/auth/check_expired', {
+    fetch('/api/auth/check_expired', {
         credentials: 'include',
     }).then(response => {
         if (response.status === 400) {
             removeCookie('jwt');
             navigate('2fa');
         }
-    }));
+    });
 
     fetch('/api/auth/get_intra_id/', {
         credentials: 'include',

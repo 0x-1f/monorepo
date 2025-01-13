@@ -92,7 +92,7 @@ class IntraAuthViewSet(viewsets.ModelViewSet):
         if code.isalnum() is False:
             return JsonResponse({'error': f"[Verification code is invalid]"}, status=status.HTTP_400_BAD_REQUEST)
         tmp_jwt_token = request.data.get('tmp_jwt')
-        payload = jwt.decode(jwt_token, settings.JWT_SECRET_KEY, algorithms=['HS256'])
+        payload = jwt.decode(tmp_jwt_token, settings.JWT_SECRET_KEY, algorithms=['HS256'])
         user_email = payload.get('user_email')
 
         try:
