@@ -86,7 +86,7 @@ class PongGameManager:
 
 	def check_connection(self): # 둘중 한명이라도 offline 되면 disconnected 판정
 		if self.players_connection["player1"] == "off" or self.players_connection["player2"] == "off":
-			self.status = "disconnected"
+			self.connection = "disconnected"
 			return False
 		else:
 			return True
@@ -121,17 +121,17 @@ class PongGameManager:
 		asyncio.create_task(self.update_game_state())
 
 	async def finish_game(self): # 게임 종료및 결과 저장 함수
-		status = "finished"
-		if self.status == "disconnected": # 한명이 나가게 되면 10 대 0 부전승 처리
+		self.status = "saving"
+		if self.connection == "disconnected": # 한명이 나가게 되면 10 대 0 부전승 처리
 			self.scores[0] = 0
 			self.scores[1] = 0
 			if self.players_connection["player1"] == "on":
 				self.scores[0] = self.win_condition
 			elif self.players_connection["player2"] == "on":
 				self.scores[1] = self.win_condition
-			self.connection = "disconnected"
+			status = "disconnected"
 		else:
-			self.status = "saving"
+			status = "finished"
 
 		if self.scores[0] > self.scores[1]: # 누가 승/패 인지 판정
 			winner_intra = self.players_intra["player1"]
