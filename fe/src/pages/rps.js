@@ -8,6 +8,7 @@ let wss = null;
 let matchWss = null;
 let choice = "";
 let countdownInterval = null;
+let matchUrl = null;
 
 export function render(app, navigate) {
     // 초기 렌더링
@@ -197,6 +198,7 @@ function renderResultPage(app, navigate, result, opponentChoice, opponentId) {
         break;
         case "draw":
         resultText.textContent = t('rps-draw', "DRAW");
+        case_draw(app, navigate);
         break;
         default:
         resultText.textContent = t('rps-unknown', "UNKNOWN");
@@ -264,6 +266,24 @@ function renderResultPage(app, navigate, result, opponentChoice, opponentId) {
     app.appendChild(btnContainer);
 }
 
+function case_draw(app, navigate) {
+    if (!matchUrl)
+        return;
+    const retryBtn = document.createElement("button");
+    retryBtn.textContent = "retry?";
+    retryBtn.classList.add("btn", "btn-warning", "rps-main-btn");
+
+    retryBtn.addEventListener("click", () => {
+        connectMatchWebSocket(app, navigate, matchUrl);
+    });
+
+    const btnContainer = document.createElement("div");
+    btnContainer.style.display = "flex";
+    btnContainer.style.justifyContent = "center";
+    btnContainer.appendChild(retryBtn);
+    app.appendChild(btnContainer);
+}
+
 /** --- 이하 웹소켓 로직 및 유틸 함수는 기존과 동일 --- **/
 
 function startMatching(app, navigate) {
@@ -275,6 +295,7 @@ function startMatching(app, navigate) {
         if (data.match_url) {
             cleanupWss(wss);
             connectMatchWebSocket(app, navigate, data.match_url);
+            matchUrl = data.match_url;
         }
     };
     wss.onerror = (err) => console.error("[Matching WSS] Error:", err);
