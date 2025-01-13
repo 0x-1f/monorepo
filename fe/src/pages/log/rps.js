@@ -27,12 +27,13 @@ export function render(app, navigate) {
 				// Generate HTML for the current item
 				const htmlContent = `
 				  <div class="game-result">
-					<h3>Game ID: ${item.rps_id}</h3>
-					<p>Date: ${item.date}</p>
-					<p>Opponent: ${item.opponent || 'None'}</p>
-					<p>Result: ${item.result}</p>
-					<p>Player 1: ${item.player1_intra_id} (${item.player1_choice})</p>
-					<p>Player 2: ${item.player2_intra_id || 'None'} (${item.player2_choice || 'None'})</p>
+					<div class="left-tab">
+						<p class="gdate">Date: ${item.date}</p>
+						<p class="gopp">vs ${item.opponent || 'None'}</p>
+					</div>
+					<div class="right-tab">
+						<p class="gresult">Result: ${item.result}</p>
+					</div>
 				  </div>
 				`;
 				// Append the HTML to the app element

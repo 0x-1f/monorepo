@@ -62,7 +62,8 @@ body {
 
 #app {
   text-align: center;
-  margin-top: calc(1em + 2em);
+  margin-top: 5em;
+  overflow-y: auto;
 }
 
 .grid {
@@ -137,3 +138,29 @@ body {
     background-color: #333;
     color: #fff;
   }
+
+.game-result {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 90vw;
+  margin: 0 auto;
+  padding-top: 0.3em;
+}
+
+.left-tab, .right-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 1em;
+}
+
+.left-tab {
+  border-left: 0.6em solid #fff;
+}
+
+.right-tab {
+  border-right: 0.6em solid #fff;
+  align-items: flex-end;
+}
