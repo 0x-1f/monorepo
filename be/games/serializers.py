@@ -8,7 +8,7 @@ class PongSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PongGame
-        fields = ['pong_id', 'created_date', 'status', 'type','winner_intra_id', 'loser_intra_id', 'winner_score', 'loser_score']
+        fields = '__all__'
 
 class PongSerializerHistory(serializers.ModelSerializer):
     winner = serializers.CharField(source='winner.intra_id')
@@ -50,7 +50,7 @@ class RPSSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RPSGame
-        fields = ['rps_id', 'created_date', 'status', 'result', 'player1_intra_id', 'player2_intra_id', 'player1_choice', 'player2_choice']
+        fields = '__all__'
 
 class RPSSerializerHistory(serializers.ModelSerializer):
     player1_intra_id = serializers.CharField(source='player1.intra_id')
