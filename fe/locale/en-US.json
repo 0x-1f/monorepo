@@ -40,5 +40,6 @@
 	"2fa-invalid": "Invalid code.",
 	"2fa-instruction": "Enter the 6-digit code sent to your id@student.42seoul.kr email for 2FA.",
 
-	"invalid-name": "Please enter only alphanumeric characters."
+	"invalid-name": "Please enter only alphanumeric characters.",
+	"LAN": "The opponent pulled the cord."
 }

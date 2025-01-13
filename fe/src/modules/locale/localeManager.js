@@ -8,7 +8,6 @@ const locales = {};
 export async function loadLocale() {
     const locale = localStorage.getItem('locale'); // Get the current locale from localStorage
     if (!locale) {
-        console.warn('No locale set in localStorage.');
         return {};
     }
 
@@ -19,7 +18,6 @@ export async function loadLocale() {
         locales[locale] = translations; // Cache the translations
         return translations;
     } catch (error) {
-        console.error(`Failed to load locale: ${locale}`, error);
         return {}; // Return empty object on failure
     }
 }
@@ -33,7 +31,6 @@ export async function loadLocale() {
 export function t(key, fallback) {
     const locale = localStorage.getItem('locale'); // Get the current locale from localStorage
     if (!locale || !locales[locale]) {
-        console.warn('Locale not loaded or set.');
         return fallback;
     }
     return locales[locale]?.[key] || fallback;

@@ -33,7 +33,6 @@ function gameRoom(app, match_url, me) {
 
 	wss.onmessage = function(e) {
 		gameState = JSON.parse(e.data);
-        console.log(gameState.status);
         if (gameState.status == 'saved') {
             app.innerHTML = `
             <h1>Game Over</h1>
@@ -45,7 +44,7 @@ function gameRoom(app, match_url, me) {
             });
         } else if (gameState.status == 'disconnected') {
             app.innerHTML = `
-            <h1>상대방이 랜뽑했습니다.</h1>
+            <h1>${t('LAN', 'Opponent mad at you.')}</h1>
             <h2>${gameState.left_score > gameState.right_score ? leftUser : rightUser} wins!</h2>
             <button id="back">Back</button>
             `;
@@ -97,7 +96,6 @@ function gameRoom(app, match_url, me) {
 		rightScore.innerText = gameState.right_score;
 	}
 
-    console.log(gameState);
     if (gameState.status == 'saved') {
         app.innerHTML = `
         <h1>Game Over</h1>

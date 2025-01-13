@@ -79,16 +79,6 @@ function renderMatchingPage(app) {
     app.appendChild(cancelBtn);
 }
 
-/** 매칭 URL이 도착한 뒤, 실제 게임방에 들어가기 전 "대기중" 화면 */
-function renderWaitingGamePage(app) {
-    app.innerHTML = "";
-
-    const waitingText = document.createElement("div");
-    waitingText.textContent = t('rps-gameMatched', "GAME matched! Waiting for opponent...");
-    waitingText.style.fontSize = "2em"; 
-
-    app.appendChild(waitingText);
-}
 /** 3) 게임 시작 화면 (가위바위보 선택) */
 function renderRpsGamePage(app) {
     // 기존 화면 비우기
@@ -301,7 +291,14 @@ function startMatching(app, navigate) {
 }
 
 function connectMatchWebSocket(app, navigate, matchUrl) {
-    renderWaitingGamePage(app);
+    app.innerHTML = "";
+
+    const waitingText = document.createElement("div");
+    waitingText.textContent = t('rps-gameMatched', "GAME matched! Waiting for opponent...");
+    waitingText.style.fontSize = "2em"; 
+
+    app.appendChild(waitingText);
+
     const splitted = matchUrl.split("/");
     const matchName = splitted[splitted.length - 2];
     
@@ -310,10 +307,17 @@ function connectMatchWebSocket(app, navigate, matchUrl) {
         const data = JSON.parse(event.data);
         if (data.status === "start") {
             renderRpsGamePage(app);
-        }
-        else if (data.status === "network_error") {
+        } else if (data.status === "network_error") {
+            console.error("[Match WSS] Network error:", data.error);
             cleanupAllWebSockets();
-            navigate("error");
+            app.innterHTML = "";
+            app.innerHTML = `
+                <h1>${t('LAN', 'Opponent mad at you')}</h1>
+                <button id="back">Back</button>
+                `;
+                document.getElementById('back').addEventListener('click', () => {
+                    window.location.href = '/main';
+                });
         }
         else if (data.status === "finished") {
             const opponentId = getOpponentIdFromMatchName(matchName);

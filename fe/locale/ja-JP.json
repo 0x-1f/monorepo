@@ -40,5 +40,6 @@
 	"2fa-invalid": "無効なコードです。",
 	"2fa-instruction": "2段階認証のため、id@student.42seoul.kr メールで送信された6桁のコードを入力してください。",
 
-	"invalid-name": "英数字のみを入力してください。"
+	"invalid-name": "英数字のみを入力してください。",
+	"LAN": "相手が回線抜きしました。"
 }

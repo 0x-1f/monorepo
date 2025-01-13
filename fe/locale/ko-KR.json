@@ -40,5 +40,6 @@
 	"2fa-invalid": "유효하지 않은 코드입니다.",
 	"2fa-instruction": "2단계 인증을 위해 id@student.42seoul.kr 메일로 발송된 6자리 코드를 입력하세요.",
 
-	"invalid-name": "영숫자만 입력하세요."
+	"invalid-name": "영숫자만 입력하세요.",
+	"LAN": "상대방이 랜뽑했습니다."
 }
