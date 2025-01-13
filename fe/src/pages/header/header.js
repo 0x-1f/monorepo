@@ -9,33 +9,33 @@ export function renderHeader(header, navigate) {
         navigate('login');
         window.location.reload();
         return;
+    } else {
+        fetch('/api/auth/check_expired', {
+            credentials: 'include',
+        }).then(response => {
+            if (response.status === 400) {
+                removeCookie('jwt');
+                navigate('2fa');
+            }
+        });
+    
+        fetch('/api/auth/get_intra_id/', {
+            credentials: 'include',
+        }).then(response => {
+            if (response.ok) {
+                return response.json();
+            }
+        }).then(data => {
+            const divElement = document.querySelector('.uid');
+            if (divElement && divElement.querySelector('p')) {
+                return;
+            }
+            const intraId = data.intra_id;
+            const uidElement = document.createElement('p');
+            uidElement.textContent = intraId;
+            document.querySelector('.uid').append(uidElement);
+        });
     }
-
-    fetch('/api/auth/check_expired', {
-        credentials: 'include',
-    }).then(response => {
-        if (response.status === 400) {
-            removeCookie('jwt');
-            navigate('2fa');
-        }
-    });
-
-    fetch('/api/auth/get_intra_id/', {
-        credentials: 'include',
-    }).then(response => {
-        if (response.ok) {
-            return response.json();
-        }
-    }).then(data => {
-        const divElement = document.querySelector('.uid');
-        if (divElement && divElement.querySelector('p')) {
-            return;
-        }
-        const intraId = data.intra_id;
-        const uidElement = document.createElement('p');
-        uidElement.textContent = intraId;
-        document.querySelector('.uid').append(uidElement);
-    });
 
     header.innerHTML = `
         <header class="header">

@@ -31,6 +31,7 @@ export function render(app, navigate) {
 			body: JSON.stringify({
 					'code': code,
 					'jwt': getCookie('jwt'),
+					'tmp_jwt': getCookie('tmp_jwt'),
 				}),
 		}).then(response => {
 			if (response.ok) {
