@@ -12,8 +12,10 @@ export function render(app, navigate) {
     if (getCookie('jwt') && fetch('/api/auth/check_expired', {
         credentials: 'include',
     }).then(response => {
-        if (response.status === 400) {
-            navigate('2fa');
+        if (response.status === 200) {
+            navigate('main');
+        } else {
+            return;
         }
     }));
 }
