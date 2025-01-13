@@ -14,16 +14,6 @@ export function render(app, navigate) {
     // 초기 렌더링
     renderStartPage(app, navigate);
     cleanupAllWebSockets();
-    // renderRpsGamePage(app);
-
-    window.onpopstate = function (event) {
-        if (wss && wss.readyState === WebSocket.OPEN) {
-            wss.close();
-        }
-        if (matchWss && matchWss.readyState === WebSocket.OPEN) {
-            matchWss.close();
-        }
-    };
 }
 
 /** 1) 최초 화면: "start matching" 버튼만 있는 화면 */
@@ -382,3 +372,14 @@ function getRandomChoice() {
     const idx = Math.floor(Math.random() * rps.length);
     return rps[idx];
 }
+
+window.addEventListener('popstate', function () {
+    if (wss) {
+        wss.onclose = function () {}; // Avoid triggering additional events
+        wss.close();
+    }
+    if (matchWss) {
+        matchWss.onclose = function () {};
+        matchWss.close();
+    }
+});
