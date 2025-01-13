@@ -32,6 +32,7 @@ class PongGameManager:
 
 		self.win_condition = 10
 		self.status = "waiting"
+		self.connection = ""
 
 	async def update_game_state(self):
 		while self.check_end() == False:
@@ -97,16 +98,26 @@ class PongGameManager:
 			self.paddle_positions[player] = min(self.canvas_height - self.paddle_height, self.paddle_positions[player] + self.paddle_speed)
 
 	def get_state(self): # 각 좌표, 점수, 상태 보내기
-		return {
-			"ball": self.ball,
-			"paddle_positions": self.paddle_positions,
-			"left_score": self.scores[0],
-			"right_score": self.scores[1],
-			"status": self.status,
-		}
+		if self.connection == "disconnected" and self.status == "saved":
+			return {
+				"ball": self.ball,
+				"paddle_positions": self.paddle_positions,
+				"left_score": self.scores[0],
+				"right_score": self.scores[1],
+				"status": "disconnected",
+			}
+		else:
+			return {
+				"ball": self.ball,
+				"paddle_positions": self.paddle_positions,
+				"left_score": self.scores[0],
+				"right_score": self.scores[1],
+				"status": self.status
+			}
 
 	def start_game_loop(self): # 게임 루프 시작 함수
 		self.status = "playing"
+		self.connection = "connected"
 		asyncio.create_task(self.update_game_state())
 
 	async def finish_game(self): # 게임 종료및 결과 저장 함수
@@ -118,7 +129,7 @@ class PongGameManager:
 				self.scores[0] = self.win_condition
 			elif self.players_connection["player2"] == "on":
 				self.scores[1] = self.win_condition
-			status = self.status
+			self.connection = "disconnected"
 		else:
 			self.status = "saving"
 
