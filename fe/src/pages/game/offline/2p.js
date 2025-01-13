@@ -180,5 +180,9 @@ export function render(app, navigate) {
     window.removeEventListener('keyup', keyupHandler);
   }
 
+  window.onpopstate = () => {
+    window.location.reload();
+  }
+
   draw(); // Start the game
 }
