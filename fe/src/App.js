@@ -74,7 +74,7 @@ async function resolveRoute(path) {
 
 async function renderPage(path) {
     await loadLocale();
-    renderHeader(document.getElementById('header'));
+    renderHeader(document.getElementById('header'), navigate);
 
     try {
         const renderer = await resolveRoute(path);
