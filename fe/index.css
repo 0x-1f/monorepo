@@ -41,6 +41,10 @@ body {
   align-items: center;
 }
 
+.header p {
+  padding-left: 1em;
+}
+
 .dropbtn {
   background-color: black;
   color: white;
