@@ -87,6 +87,8 @@ class IntraAuthViewSet(viewsets.ModelViewSet):
         code = request.data.get('code')
         if not code:
             return JsonResponse({'error': f"[Verification code is required]"}, status=status.HTTP_400_BAD_REQUEST)
+        if code.isalnum() is False:
+            return JsonResponse({'error': f"[Verification code is invalid]"}, status=status.HTTP_400_BAD_REQUEST)
         jwt_token = request.data.get('jwt')
         payload = jwt.decode(jwt_token, settings.JWT_SECRET_KEY, algorithms=['HS256'])
         user_email = payload.get('user_email')
@@ -137,8 +139,10 @@ class IntraAuthViewSet(viewsets.ModelViewSet):
             return JsonResponse({'intra_id': user.intra_id}, status=status.HTTP_200_OK)
 
 def send_and_save_verification_code(user):
-    verification_code = get_random_string(length=6)
+    RANDOM_STRING_CHARS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+    verification_code = get_random_string(length=6, allowed_chars=RANDOM_STRING_CHARS)
     user.verification_code = verification_code
+    print(f"user verification code for {user.intra_id} is {verification_code}", flush=True)
     user.save()
 
     mail_subject = "0x-1f 이메일 인증 코드입니다."
