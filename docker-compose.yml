@@ -19,7 +19,7 @@ services:
   fe:
     build:
       context: fe
-      dockerfile: dockerfile
+      dockerfile: Dockerfile
     container_name: fe
     env_file:
       - fe/.env

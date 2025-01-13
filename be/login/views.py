@@ -142,7 +142,6 @@ def send_and_save_verification_code(user):
     RANDOM_STRING_CHARS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
     verification_code = get_random_string(length=6, allowed_chars=RANDOM_STRING_CHARS)
     user.verification_code = verification_code
-    print(f"user verification code for {user.intra_id} is {verification_code}", flush=True)
     user.save()
 
     mail_subject = "0x-1f 이메일 인증 코드입니다."
