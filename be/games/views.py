@@ -29,8 +29,10 @@ class PongViewSet(viewsets.ModelViewSet):
         primary_key = user.user_id
         # type_filter = request.query_params.get('type', "")
         games = PongGame.objects.filter(Q(winner=user) | Q(loser=user))
+        print(f"games: {games}", flush=True)
         # games = games.filter(type=type_filter)
         serializer = self.get_serializer(games, many=True, context={'request': request})
+        print(f"serializer result {serializer.data}", flush=True)
         return Response(serializer.data)
 
 

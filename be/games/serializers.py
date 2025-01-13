@@ -11,15 +11,15 @@ class PongSerializer(serializers.ModelSerializer):
         fields = ['pong_id', 'created_date', 'status', 'type','winner_intra_id', 'loser_intra_id', 'winner_score', 'loser_score']
 
 class PongSerializerHistory(serializers.ModelSerializer):
-    winner_intra_id = serializers.CharField(source='winner.intra_id')
-    loser_intra_id = serializers.CharField(source='loser.intra_id')
+    winner = serializers.CharField(source='winner.intra_id')
+    loser = serializers.CharField(source='loser.intra_id')
     date = serializers.DateTimeField(source='created_date', format="%Y-%m-%d", read_only=True)
     opponent = serializers.SerializerMethodField()
     result = serializers.SerializerMethodField()
 
     class Meta:
         model = PongGame
-        fields = ['pong_id', 'date', 'opponent', 'result', 'winner_intra_id', 'loser_intra_id', 'winner_score', 'loser_score']
+        fields = ['pong_id', 'date', 'opponent', 'result', 'winner', 'loser', 'winner_score', 'loser_score']
 
     def get_opponent(self, obj):
         intra_id = self.get_intra_id()
