@@ -17,7 +17,6 @@ export function renderHeader(header, navigate) {
         }
     }));
 
-    let intraId = '';
     fetch('/api/auth/get_intra_id/', {
         credentials: 'include',
     }).then(response => {
@@ -25,23 +24,25 @@ export function renderHeader(header, navigate) {
             return response.json();
         }
     }).then(data => {
-        intraId = data.intra_id;
-        const uid = `<p>${intraId}</p>`;
-        document.querySelector('.dropdown-content').append(uid);
-    })
+        const intraId = data.intra_id;
+        const uidElement = document.createElement('p');
+        uidElement.textContent = intraId;
+        console.log(intraId);
+        document.querySelector('.uid').append(uidElement);
+    });
 
     header.innerHTML = `
         <header class="header">
-            <button class="pongbtn"  id="pongbtn">PONG</button>
+            <button class="pongbtn" id="pongbtn">PONG</button>
             <button class="dropbtn" id="dropbtn">Language</button>
             <div class="dropdown-content" id="dropdowncontent">
                 <button id="en-US">English</button>
                 <button id="ja-JP">日本語</button>
                 <button id="ko-KR">한국어</button>
             </div> <!-- .dropdown-content -->
+            <div class="uid"></div>
         </header>
     `;
-    
 
     document.getElementById('dropbtn').addEventListener('click', () => {
         const dropdown = document.getElementById('dropdowncontent');
