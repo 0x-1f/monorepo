@@ -1,5 +1,7 @@
 import { t } from '/src/modules/locale/localeManager.js';
 
+let wss = null;
+
 function waitingRoom(app) {
     app.innerHTML = `
     <div class="grid">
@@ -21,24 +23,38 @@ function gameRoom(app, match_url, me) {
     </div>
     `;
 
-    const wss = new WebSocket(`wss://${window.location.hostname}${match_url}${me}`);
+    wss = new WebSocket(`wss://${window.location.hostname}${match_url}${me}`);
+
+    let gameState;
+
+    const parts = match_url.split('/');
+    const lastPart = parts[parts.length - 2];
+    const [leftUser, rightUser] = lastPart.split('_');
 
 	wss.onmessage = function(e) {
-		const gameState = JSON.parse(e.data);
+		gameState = JSON.parse(e.data);
+        console.log(gameState.status);
+        if (gameState.status == 'saved') {
+            app.innerHTML = `
+            <h1>Game Over</h1>
+            <h2>${gameState.left_score > gameState.right_score ? leftUser : rightUser } wins!</h2>
+            <button id="back">Back</button>
+            `;
+            document.getElementById('back').addEventListener('click', () => {
+                window.location.href = '/main';
+            });
+        } else if (gameState.status == 'disconnected') {
+            app.innerHTML = `
+            <h1>상대방이 랜뽑했습니다.</h1>
+            <h2>${gameState.left_score > gameState.right_score ? leftUser : rightUser} wins!</h2>
+            <button id="back">Back</button>
+            `;
+            document.getElementById('back').addEventListener('click', () => {
+                window.location.href = '/main';
+            });
+        }
 		drawGameState(gameState);
 	}
-
-    wss.onclose = function(e) {
-        app.innerHTML = `
-        <h1>Game Over</h1>
-        <h2>${gameState.left_score > gameState.right_score ? leftUser : rightUser} wins!</h2>
-        <button id="back">Back</button>
-        `
-
-        document.getElementById('back').addEventListener('click', () => {
-            window.location.href = '/main';
-        });
-    }
 
 	function drawGameState(gameState) {
 		if (!gameState) return;
@@ -79,9 +95,28 @@ function gameRoom(app, match_url, me) {
 
 		leftScore.innerText = gameState.left_score;
 		rightScore.innerText = gameState.right_score;
-
-		movePaddle();
 	}
+
+    console.log(gameState);
+    if (gameState.status == 'saved') {
+        app.innerHTML = `
+        <h1>Game Over</h1>
+        <h2>${gameState.left_score > gameState.right_score ? leftUser : rightUser} wins!</h2>
+        <button id="back">Back</button>
+        `;
+        document.getElementById('back').addEventListener('click', () => {
+            window.location.href = '/main';
+        });
+    } else if (gameState.status == 'disconnected') {
+        app.innerHTML = `
+        <h1>상대방이 랜뽑했습니다.</h1>
+        <h2>${gameState.left_score > gameState.right_score ? leftUser : rightUser} wins!</h2>
+        <button id="back">Back</button>
+        `;
+        document.getElementById('back').addEventListener('click', () => {
+            window.location.href = '/main';
+        });
+    }
 
     document.addEventListener("keydown", function (e) {
         if (!wss) return;
@@ -95,18 +130,11 @@ function gameRoom(app, match_url, me) {
           wss.send(JSON.stringify({ "move" : "down" }));
         }
     });
-
-    window.onpopstate = function (event) {
-        if (wss && wss.readyState === WebSocket.OPEN) {
-            wss.close();
-        }
-    };
 }
 
 export function render(app, navigate) {
     waitingRoom(app);
 
-    let wss; // Declare WebSocket at the top for access throughout the function
     let intraId; // To store the fetched intra ID
 
     // Fetch intra ID from the API
@@ -140,11 +168,11 @@ export function render(app, navigate) {
         .catch(error => {
             console.error('Error fetching intra ID:', error);
         });
-
-    // Handle back navigation or cleanup
-    window.onpopstate = function (event) {
-        if (wss && wss.readyState === WebSocket.OPEN) {
-            wss.close();
-        }
-    };
 }
+
+window.addEventListener('popstate', function () {
+    if (wss) {
+        wss.onclose = function () {}; // Avoid triggering additional events
+        wss.close();
+    }
+});
