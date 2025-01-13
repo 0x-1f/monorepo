@@ -138,10 +138,12 @@ class PongMatchConsumer(AsyncWebsocketConsumer):
 		global pong_game_rooms
 		global time_limit
 		while pong_game_rooms[self.match_name].status == "waiting" and self.timer < time_limit: # 시간 제한동안 매칭된 상대 입장을 기다림
+			print("waiting")
 			await asyncio.sleep(1/fps)
 			self.timer += 1/fps
 		if time_limit <= self.timer: # 만약 시간제한동안 매칭된 상대가 들어오지 않는다면 network_error 로 판단
-			pong_game_rooms[self.match_name].change_status("network_error")
+			print("network_error")
+			await pong_game_rooms[self.match_name].change_status("network_error")
 			await self.send(text_data=json.dumps(
 				pong_game_rooms[self.match_name].get_state()
 			))
