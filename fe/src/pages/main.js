@@ -37,7 +37,6 @@ export function render(app, navigate) {
 
       // Function to trigger the Konami code effect
       function activateKonamiMode() {
-        console.log("Konami Code Activated!");
         const body = document.body;
         if (!body) return;
 
@@ -54,7 +53,6 @@ export function render(app, navigate) {
       }
 
       function activateRaccoonMode() {
-        console.log("Raccoon Code Activ");
         const raccoonImg = document.createElement('img');
         raccoonImg.src = raccoon;
         raccoonImg.style.position = 'fixed';

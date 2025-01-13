@@ -17,7 +17,6 @@ export async function loadLocale() {
     try {
         const translations = await fetch(`/locale/${locale}.json`).then((res) => res.json());
         locales[locale] = translations; // Cache the translations
-        console.log(`Locale ${locale} loaded and cached.`);
         return translations;
     } catch (error) {
         console.error(`Failed to load locale: ${locale}`, error);
@@ -47,7 +46,6 @@ export function setupLocaleListener() {
     // Listen for cross-tab locale changes
     window.addEventListener('storage', async (event) => {
         if (event.key === 'locale') {
-            console.log(`Locale changed to ${event.newValue} across tabs.`);
             await loadLocale(); // Dynamically reload the locale
         }
     });
@@ -55,7 +53,6 @@ export function setupLocaleListener() {
     // Listen for same-tab locale changes via a custom event
     window.addEventListener('localStorageChange', async (event) => {
         if (event.detail.key === 'locale') {
-            console.log(`Locale changed to ${event.detail.value} in the same tab.`);
             await loadLocale(); // Dynamically reload the locale
         }
     });

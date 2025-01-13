@@ -23,10 +23,6 @@ function gameRoom(app, match_url, me) {
 
     const wss = new WebSocket(`wss://${window.location.hostname}${match_url}${me}`);
 
-    wss.onopen = function(e) {
-		console.log('WS Opened');
-	}
-
 	wss.onmessage = function(e) {
 		const gameState = JSON.parse(e.data);
 		drawGameState(gameState);
@@ -129,15 +125,9 @@ export function render(app, navigate) {
             // Dynamically determine the WebSocket protocol based on the current protocol
             wss = new WebSocket(`wss://${window.location.hostname}/ws/pong/join/${intraId}`);
 
-            // WebSocket event listeners
-            wss.onopen = function (e) {
-                console.log('Waiting for participations...');
-            };
-
             wss.onmessage = function (e) {
                 const data = JSON.parse(e.data);
                 const match_url = data.match_url;
-                console.log(match_url);
 
                 // Transition to the game room
                 gameRoom(app, match_url, intraId);
@@ -145,10 +135,6 @@ export function render(app, navigate) {
 
             wss.onerror = function (e) {
                 console.error('WebSocket error:', e);
-            };
-
-            wss.onclose = function (e) {
-                console.log('WebSocket closed:', e.reason);
             };
         })
         .catch(error => {

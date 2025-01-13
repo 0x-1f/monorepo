@@ -70,8 +70,6 @@ export function render(app, navigate) {
     player3 = p3 !== "" ? p3 : "player3";
     player4 = p4 !== "" ? p4 : "player4";
 
-    console.log("플레이어 입력 완료:", player1, player2, player3, player4);
-
     tournamentStarted = true;
     startGame(app, navigate);
   });
@@ -244,28 +242,23 @@ function startGame(app, navigate) {
       alert(`${winner} wins!`);
       leftScore.textContent = 0;
       rightScore.textContent = 0;
-      console.log("gameNum: ", gameNum);
 
       switch(gameNum) {
         case 1:
           winner === "Left" ? winner1 = player1 : winner1 = player2;
-          console.log("winner1: ", winner1);
           break;
         case 2:
           winner === "Left" ? winner2 = player3 : winner2 = player4;
-          console.log("winner2: ", winner2);
           break;
         case 3:
           // 결승전 승자는 WINNER
           winner === "Left" ? WINNER = winner1 : WINNER = winner2;
-          console.log("WINNER: ", WINNER);
           break;
       }
       gameNum++;
 
       // gameNum이 4가 되면 토너먼트 끝 -> 최종 결과 화면
       if (gameNum === 4) {
-        console.log("WINNER: ", WINNER);
         cleanup();
         showFinalResults(app, navigate);
       }

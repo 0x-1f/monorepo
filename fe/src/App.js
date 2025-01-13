@@ -7,7 +7,6 @@ setupLocaleListener();
 
 window.addEventListener('localStorageChange', async (event) => {
     if (event.detail.key === 'locale') {
-        console.log('Locale changed, re-rendering page...');
         const currentPath = window.location.pathname.replace('/', '') || 'login'; // Get current path
         await renderPage(currentPath); // Re-render the page dynamically
     }
@@ -15,7 +14,6 @@ window.addEventListener('localStorageChange', async (event) => {
 
 window.addEventListener('storage', async (event) => {
     if (event.key === 'locale') {
-        console.log('Locale changed across tabs, re-rendering page...');
         const currentPath = window.location.pathname.replace('/', '') || 'login';
         await renderPage(currentPath);
     }
@@ -68,7 +66,6 @@ async function resolveRoute(path) {
         currentRoute = currentRoute[segment]; // Drill further.
     }
 
-    console.log(`Route not found for path: ${path}, using errorPage.`);
     return typeof currentRoute === 'function' ? currentRoute : errorPage;
 }
 
@@ -78,7 +75,6 @@ async function renderPage(path) {
 
     try {
         const renderer = await resolveRoute(path);
-        console.log(`Rendering path: ${path}`);
         renderer(app, navigate);
     } catch (error) {
         console.error(`Error rendering page for path "${path}":`, error);

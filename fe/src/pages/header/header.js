@@ -27,7 +27,6 @@ export function renderHeader(header, navigate) {
         const intraId = data.intra_id;
         const uidElement = document.createElement('p');
         uidElement.textContent = intraId;
-        console.log(intraId);
         document.querySelector('.uid').append(uidElement);
     });
 

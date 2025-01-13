@@ -289,7 +289,6 @@ function case_draw(app, navigate) {
 function startMatching(app, navigate) {
     renderMatchingPage(app);
     wss = new WebSocket(`wss://${window.location.hostname}/ws/rps/join/${intraId}`);
-    wss.onopen = () => console.log("[Matching WSS] Connected");
     wss.onmessage = (event) => {
         const data = JSON.parse(event.data);
         if (data.match_url) {
@@ -299,7 +298,6 @@ function startMatching(app, navigate) {
         }
     };
     wss.onerror = (err) => console.error("[Matching WSS] Error:", err);
-    wss.onclose = () => console.log("[Matching WSS] Closed");
 }
 
 function connectMatchWebSocket(app, navigate, matchUrl) {
