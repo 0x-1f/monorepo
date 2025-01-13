@@ -20,6 +20,8 @@
     "4p-2nd": "2位",
     "4p-3rd": "3位",
     "4p-main" : "メイン",
+    "4p-semifinal" : "じゅんけっしょう",
+    "4p-final" : "けっしょう",
 
     "rps-startMatching": "マッチング開始",
     "rps-watingOpponent": "対戦相手を待っています...",

@@ -20,6 +20,8 @@
     "4p-2nd": "2등",
     "4p-3rd": "3등",
     "4p-main" : "메인",
+    "4p-semifinal" : "준결승",
+    "4p-final" : "결승",
 
     "rps-startMatching": "매칭 시작",
     "rps-watingOpponent": "상대방을 기다리는 중...",

@@ -20,6 +20,10 @@ let winner2 = null;
 /* 최종 우승자 */
 let WINNER = null;
 
+/* 게임 정보 */
+let semifinalStr = t('4p-semifinal', 'Semifinal');
+let gameStage = [null, semifinalStr + "_1", semifinalStr + "_2", t('4p-final', 'Final')];
+
 /* 토너먼트 진행 여부(입력 폼 뒤 게임 시작) */
 let tournamentStarted = false;
 
@@ -87,6 +91,7 @@ export function render(app, navigate) {
 function startGame(app, navigate) {
   /* 먼저 게임 화면으로 교체 */
   app.innerHTML = `
+    <h1 id="gameInfo">${gameStage[gameNum]}</h1>
     <canvas id="pongCanvas" width="800px" height="400px" style="border: 1px solid #FFF">
       Your browser does not support this game.
     </canvas>
@@ -256,6 +261,7 @@ function startGame(app, navigate) {
           break;
       }
       gameNum++;
+      document.getElementById('gameInfo').textContent = gameStage[gameNum];
 
       // gameNum이 4가 되면 토너먼트 끝 -> 최종 결과 화면
       if (gameNum === 4) {
