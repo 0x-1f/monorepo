@@ -73,23 +73,25 @@ class IntraAuthViewSet(viewsets.ModelViewSet):
         )
 
         try:
-            jwt_token = create_jwt_token(user_profile, settings.JWT_SECRET_KEY, 3)
+            jwt_token = create_jwt_token(user_profile, settings.JWT_SECRET_KEY, 180)
         except Exception as e:
             return JsonResponse({"error": f"[Failed to create JWT token]: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         send_and_save_verification_code(user_profile)
 
         response = redirect(REDIRECT_URI)
-        response.set_cookie('jwt', jwt_token)
+        response.set_cookie('tmp_jwt', jwt_token)
+        print(f"REDIRECT_URI: {REDIRECT_URI}", flush=True)
         return response
 
     @action(detail=False, methods=["post"], url_path="verify")
     def verify_code(self, request):
+        print(f"got here", flush = True)
         code = request.data.get('code')
         if not code:
             return JsonResponse({'error': f"[Verification code is required]"}, status=status.HTTP_400_BAD_REQUEST)
         if code.isalnum() is False:
             return JsonResponse({'error': f"[Verification code is invalid]"}, status=status.HTTP_400_BAD_REQUEST)
-        jwt_token = request.data.get('jwt')
+        tmp_jwt_token = request.data.get('tmp_jwt')
         payload = jwt.decode(jwt_token, settings.JWT_SECRET_KEY, algorithms=['HS256'])
         user_email = payload.get('user_email')
 
@@ -97,7 +99,7 @@ class IntraAuthViewSet(viewsets.ModelViewSet):
             user = Users.objects.get(email=user_email)
 
             if user.verification_code == code:
-                jwt_token = create_jwt_token(user, settings.JWT_SECRET_KEY, 3)
+                jwt_token = create_jwt_token(user, settings.JWT_SECRET_KEY, 3 * 24 * 60 * 60)
                 response = JsonResponse({'message': 'Verification success'},status=status.HTTP_200_OK)
                 response.set_cookie('jwt', jwt_token)
                 return response
@@ -111,6 +113,8 @@ class IntraAuthViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=["get"], url_path="check_expired")
     def is_expired(self, request):
         jwt_token = request.COOKIES.get('jwt')
+        if not jwt_token:
+            jwt_token = request.COOKIES.get('tmp_jwt')
         if not jwt_token:
             return JsonResponse({'error': 'JWT token not found'}, status=status.HTTP_404_NOT_FOUND)
         try:
@@ -148,11 +152,11 @@ def send_and_save_verification_code(user):
     message = f'당신의 인증 코드는 {verification_code} 입니다.'
     send_mail(mail_subject, message, 'moon@mooncloud.kr', [user.email])
 
-def create_jwt_token(user: Users, secret_key, expire_days:int):
+def create_jwt_token(user: Users, secret_key, expire_seconds:int):
     try:
         payload = {
             'user_email': user.email,
-            'exp': datetime.utcnow() + timedelta(days=expire_days),
+            'exp': datetime.utcnow() + timedelta(seconds=expire_seconds),
         }
         token = jwt.encode(payload, secret_key, algorithm='HS256')
         token = token.decode('utf-8') if isinstance(token, bytes) else token

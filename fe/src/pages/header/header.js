@@ -4,10 +4,10 @@ import { getCookie, removeCookie } from "../../modules/cookie/cookieManager";
 export function renderHeader(header, navigate) {
 
     const jwt = getCookie('jwt');
-    if (!jwt && window.location.pathname !== '/login') {
-        window.location.href = '/login';
+    if (!jwt) {
+        navigate('login');
     }
-    
+
     if (fetch('/api/auth/check_expired', {
         credentials: 'include',
     }).then(response => {
