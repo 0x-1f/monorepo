@@ -168,7 +168,7 @@ EMAIL_HOST = config('SMTP_HOST', default="")
 EMAIL_PORT = config('SMTP_PORT', default="")
 EMAIL_HOST_USER = config('SMTP_ID', default="")
 EMAIL_HOST_PASSWORD = config('SMTP_PW', default="")
-EMAIL_USE_TLS = True
-DEFAULT_FROM_EMAIL = 'trustme.iamnotvirus@gmail.com'
+EMAIL_USE_SSL = True
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 JWT_SECRET_KEY = config('JWT_SECRET_KEY', default="")

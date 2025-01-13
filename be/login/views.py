@@ -147,7 +147,7 @@ def send_and_save_verification_code(user):
 
     mail_subject = "0x-1f 이메일 인증 코드입니다."
     message = f'당신의 인증 코드는 {verification_code} 입니다.'
-    send_mail(mail_subject, message, 'trustme.iamnotvirus@gmail.com', [user.email])
+    send_mail(mail_subject, message, 'moon@mooncloud.kr', [user.email])
 
 def create_jwt_token(user: Users, secret_key, expire_days:int):
     try:
