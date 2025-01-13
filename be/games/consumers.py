@@ -146,6 +146,7 @@ class PongMatchConsumer(AsyncWebsocketConsumer):
 				pong_game_rooms[self.match_name].get_state()
 			))
 			await self.close()
+			await asyncio.sleep(1)
 		while pong_game_rooms[self.match_name].status == "playing": # 게임이 진행되는 동안 게임좌표를 player에게 보내기
 			await self.send(text_data=json.dumps(
 				pong_game_rooms[self.match_name].get_state()
@@ -286,7 +287,11 @@ class RPSMatchConsumer(AsyncWebsocketConsumer):
 			self.timer += 1/fps
 		if time_limit <= self.timer: # 시간제한이 지나도록 상대가 들어오지 않으면 network_error로 간주
 			await rps_game_rooms[self.match_name].change_status("network_error")
+			await self.send(text_data=json.dumps( # 시작신호 주고 10(?!)초 기다리기 (프론트에서 카운트 다운)//
+				{"status": "network_error"}
+			))
 			await self.close()
+			await asyncio.sleep(1)
 		else:
 			await self.send(text_data=json.dumps( # 시작신호 주고 10(?!)초 기다리기 (프론트에서 카운트 다운)//
 				{"status": "start"}
