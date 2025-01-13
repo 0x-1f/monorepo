@@ -57,16 +57,33 @@ function navigate(path) {
 
 async function resolveRoute(path) {
     const segments = path.split('/');
+
     let currentRoute = routes;
 
-    for (const segment of segments) {
+    for (let i = 0; i < segments.length; i++) {
+        // 현재 segment
+        const segment = segments[i];
+
+        // 아직 세그먼트가 남아있는데 currentRoute가 함수라면 => 에러
         if (typeof currentRoute === 'function') {
-            return currentRoute; // Match function.
+        return errorPage; 
         }
-        currentRoute = currentRoute[segment]; // Drill further.
+
+        // currentRoute가 객체(또는 중첩 라우트)라고 가정 → 해당 키로 접근
+        currentRoute = currentRoute[segment];
+        // 해당 키가 없으면 즉시 에러
+        if (!currentRoute) {
+        return errorPage;
+        }
     }
 
-    return typeof currentRoute === 'function' ? currentRoute : errorPage;
+    // 모든 segments를 소진한 후:
+    // currentRoute가 함수면 정상 라우트, 아니면 에러
+    if (typeof currentRoute === 'function') {
+        return currentRoute;
+    } else {
+        return errorPage;
+    }
 }
 
 async function renderPage(path) {
