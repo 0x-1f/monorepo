@@ -374,12 +374,5 @@ function getRandomChoice() {
 }
 
 window.addEventListener('popstate', function () {
-    if (wss) {
-        wss.onclose = function () {}; // Avoid triggering additional events
-        wss.close();
-    }
-    if (matchWss) {
-        matchWss.onclose = function () {};
-        matchWss.close();
-    }
+    cleanupAllWebSockets();
 });
