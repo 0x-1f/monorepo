@@ -75,6 +75,10 @@ export function render(app, navigate) {
     tournamentStarted = true;
     startGame(app, navigate);
   });
+
+  window.onpopstate = () => {
+    window.location.reload();
+  }
 }
 
 /* ------------------------------------------------
